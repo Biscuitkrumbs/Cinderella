@@ -1,2 +1,2 @@
-// Cinderella configuration
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkxlk-pGuupVQhv39kHo5QINuOi4bAy1nJfhDDbJ2XWtH4rimOR8iGFtvtaPU9Wor-6g/exec";
+// Paste your Google Apps Script Web App URL here later.
+const SCRIPT_URL = "";

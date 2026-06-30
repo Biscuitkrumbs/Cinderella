@@ -3,128 +3,102 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Cinderella Planner</title>
+  <title>Cinderella V3</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Cinderella</p>
-      <h1>Stay Planner</h1>
-      <p id="summaryText" class="summary">Loading...</p>
+  <div class="app">
+    <aside class="side-nav">
+      <div class="brand">Cinderella</div>
+      <button class="nav active">Timeline</button>
+      <button class="nav" id="showTodayBtn">Today</button>
+      <button class="nav" id="showPropertiesBtn">Properties</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="prevBtn" class="icon-btn">‹</button>
+        <h1 id="monthTitle">Timeline</h1>
+        <button id="nextBtn" class="icon-btn">›</button>
+        <button id="todayBtn" class="today-btn">Today</button>
+        <button id="addPropertyBtn" class="secondary-btn">+ Property</button>
+        <button id="addBookingBtn" class="primary-btn">+ Stay</button>
+      </header>
+
+      <section class="timeline-wrap">
+        <div id="timeline" class="timeline"></div>
+      </section>
+
+      <section class="legend">
+        <span><i class="legend-cell"></i> one day / one night line</span>
+        <span><i class="legend-dot clean"></i> checkout / clean</span>
+        <span>Tap a property to edit it. Tap a stay to edit / complete.</span>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="propertyDialog">
+    <form id="propertyForm" method="dialog">
+      <h2 id="propertyDialogTitle">Add Property</h2>
+      <input id="propertyId" type="hidden" />
+      <label>Property name<input id="propertyName" required placeholder="Barrier Reef Retreat" /></label>
+      <label>Default clean time<input id="propertyHours" type="number" step="0.25" min="0" value="2.5" /></label>
+      <label>Address<input id="propertyAddress" placeholder="Optional" /></label>
+      <label>Access / key notes<textarea id="propertyAccess" rows="3" placeholder="Lockbox, parking, keyring notes..."></textarea></label>
+      <label>Colour</label>
+      <div id="colourChoices" class="colour-choices"></div>
+      <div class="dialog-actions"><button type="button" id="cancelPropertyBtn">Cancel</button><button class="primary-btn">Save Property</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="bookingDialog">
+    <form id="bookingForm" method="dialog">
+      <h2 id="bookingDialogTitle">Add Stay</h2>
+      <input id="bookingId" type="hidden" />
+      <label>Property<select id="bookingProperty" required></select></label>
+      <label>Guest names<input id="bookingGuest" required placeholder="Emma & Nick" /></label>
+      <label>Check in<input id="bookingCheckIn" type="date" required /></label>
+      <label>Check out<input id="bookingCheckOut" type="date" required /></label>
+      <div class="dialog-actions split">
+        <button type="button" id="deleteBookingBtn" class="danger-btn">Delete</button>
+        <span></span>
+        <button type="button" id="cancelBookingBtn">Cancel</button>
+        <button class="primary-btn">Save Stay</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="completeDialog">
+    <form id="completeForm" method="dialog">
+      <h2>Complete Clean</h2>
+      <p id="completeSub" class="muted"></p>
+      <div class="bed-grid">
+        <label>King<div class="counter"><button type="button" data-bed="king" data-step="-1">−</button><input id="bedKing" type="number" min="0" value="0"><button type="button" data-bed="king" data-step="1">+</button></div></label>
+        <label>Queen<div class="counter"><button type="button" data-bed="queen" data-step="-1">−</button><input id="bedQueen" type="number" min="0" value="0"><button type="button" data-bed="queen" data-step="1">+</button></div></label>
+        <label>Single<div class="counter"><button type="button" data-bed="single" data-step="-1">−</button><input id="bedSingle" type="number" min="0" value="0"><button type="button" data-bed="single" data-step="1">+</button></div></label>
+      </div>
+      <label>Invoice notes<textarea id="completeNotes" rows="4" placeholder="Anything extra to include later on invoice..."></textarea></label>
+      <div class="dialog-actions"><button type="button" id="cancelCompleteBtn">Cancel</button><button class="success-btn">Save & Complete</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="detailDialog">
+    <div class="detail-panel">
+      <button id="closeDetailBtn" class="close">×</button>
+      <h2 id="detailTitle"></h2>
+      <p id="detailProperty" class="muted"></p>
+      <dl>
+        <dt>Check in</dt><dd id="detailCheckIn"></dd>
+        <dt>Check out</dt><dd id="detailCheckOut"></dd>
+        <dt>Nights</dt><dd id="detailNights"></dd>
+      </dl>
+      <button id="editStayBtn" class="outline-btn">Edit Booking</button>
+      <button id="completeStayBtn" class="success-btn">Complete Clean</button>
+      <button id="issueStayBtn" class="warn-btn">Report Issue</button>
     </div>
-    <button id="addStayBtn" class="fab" aria-label="Add stay">+</button>
-  </header>
-
-  <main>
-    <section class="card today-card">
-      <div>
-        <p class="label">Today</p>
-        <h2 id="todayTitle">0 cleans</h2>
-        <p id="nextClean" class="muted">All clear</p>
-      </div>
-      <div class="progress-pill"><span id="progressText">0 / 0</span></div>
-    </section>
-
-    <section class="card planner-card">
-      <div class="planner-head">
-        <div>
-          <h2>4 week view</h2>
-          <p class="muted">Swipe sideways. Tap a stay to edit.</p>
-        </div>
-        <button id="jumpTodayBtn" class="soft-btn">Today</button>
-      </div>
-      <div id="timeline" class="timeline" aria-label="Stay timeline"></div>
-      <div class="legend">
-        <span><i class="dot today"></i>Checkout today</span>
-        <span><i class="dot future"></i>Upcoming</span>
-        <span><i class="dot past"></i>Past</span>
-        <span><i class="dot issue"></i>Issue</span>
-      </div>
-    </section>
-
-    <section class="card list-card">
-      <div class="planner-head">
-        <h2>Today's cleans</h2>
-        <span id="cleanCount" class="badge">0</span>
-      </div>
-      <div id="todayList" class="today-list"></div>
-    </section>
-  </main>
-
-  <nav class="bottom-nav">
-    <button class="active">Planner</button>
-    <button id="feedbackBtn">Feedback</button>
-  </nav>
-
-  <dialog id="stayDialog">
-    <form id="stayForm" method="dialog">
-      <div class="dialog-title">
-        <h2 id="stayDialogTitle">Add Stay</h2>
-        <button type="button" id="closeStayBtn" class="xbtn">×</button>
-      </div>
-      <input id="editIndex" type="hidden" />
-      <label>Property nickname<input id="propertyInput" required placeholder="Ocean View" /></label>
-      <label>Guest names<input id="guestInput" required placeholder="Emma & Nick" /></label>
-      <div class="two-col">
-        <label>Check in<input id="checkInInput" type="date" required /></label>
-        <label>Check out<input id="checkOutInput" type="date" required /></label>
-      </div>
-      <label>Status
-        <select id="statusInput">
-          <option value="pending">Pending</option>
-          <option value="done">Clean done</option>
-          <option value="issue">Issue</option>
-        </select>
-      </label>
-      <div class="dialog-actions between">
-        <button type="button" id="deleteStayBtn" class="danger hidden">Delete</button>
-        <div>
-          <button type="button" id="issueFromStayBtn" class="soft-btn hidden">Report issue</button>
-          <button type="submit" class="primary">Save</button>
-        </div>
-      </div>
-    </form>
   </dialog>
 
-  <dialog id="issueDialog">
-    <form id="issueForm" method="dialog">
-      <div class="dialog-title">
-        <h2>Report Issue</h2>
-        <button type="button" id="closeIssueBtn" class="xbtn">×</button>
-      </div>
-      <input id="issueIndex" type="hidden" />
-      <label>Issue type
-        <select id="issueTypeInput" required>
-          <option value="">Choose one</option>
-          <option>Missing supplies</option>
-          <option>Damage</option>
-          <option>Access / key problem</option>
-          <option>Extra messy</option>
-          <option>Linen / laundry</option>
-          <option>Other</option>
-        </select>
-      </label>
-      <label>Notes<textarea id="issueNotesInput" rows="4" placeholder="What happened?"></textarea></label>
-      <div class="dialog-actions">
-        <button type="submit" class="primary">Save issue</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="feedbackDialog">
-    <form id="feedbackForm" method="dialog">
-      <div class="dialog-title">
-        <h2>What annoyed you?</h2>
-        <button type="button" id="closeFeedbackBtn" class="xbtn">×</button>
-      </div>
-      <textarea id="feedbackInput" rows="5" placeholder="Cindy's weekly feedback..."></textarea>
-      <div class="dialog-actions"><button type="submit" class="primary">Send</button></div>
-    </form>
-  </dialog>
-
-  <div id="toast" class="toast hidden"></div>
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>

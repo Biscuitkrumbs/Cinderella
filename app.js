@@ -1,50 +1,66 @@
-const DAY_MS=86400000;
-let stays=[];
-let issues=[];
-let timelineStart=startOfDay(addDays(new Date(),-7));
-const sampleStays=[
- {property:'Ocean View',guest:'Emma & Nick',checkIn:iso(addDays(new Date(),-2)),checkOut:iso(addDays(new Date(),1)),status:'pending'},
- {property:'Ocean View',guest:'Jake & Sarah',checkIn:iso(addDays(new Date(),3)),checkOut:iso(addDays(new Date(),6)),status:'pending'},
- {property:'Riverfront',guest:'Michael',checkIn:iso(addDays(new Date(),0)),checkOut:iso(addDays(new Date(),4)),status:'pending'},
- {property:'White House',guest:'Daniel & Claire',checkIn:iso(addDays(new Date(),5)),checkOut:iso(addDays(new Date(),7)),status:'pending'},
- {property:'Beachside',guest:'Sophie',checkIn:iso(addDays(new Date(),8)),checkOut:iso(addDays(new Date(),12)),status:'pending'},
- {property:'Mountain Retreat',guest:'Chris & Pat',checkIn:iso(addDays(new Date(),-6)),checkOut:iso(addDays(new Date(),2)),status:'issue'},
- {property:'Sunset Villa',guest:'Aaron & Jess',checkIn:iso(addDays(new Date(),12)),checkOut:iso(addDays(new Date(),16)),status:'pending'},
- {property:'Lakeside',guest:'Sarah',checkIn:iso(addDays(new Date(),17)),checkOut:iso(addDays(new Date(),19)),status:'pending'},
- {property:'Pine Cottage',guest:'Steve & Anna',checkIn:iso(addDays(new Date(),22)),checkOut:iso(addDays(new Date(),25)),status:'pending'}
+const colours = [
+  '#7b4ad9','#2f80ed','#72bf44','#ff8a3d','#ef5b93','#f4c20d','#67c7d4','#14a0a0','#8aae66','#ff80b5'
 ];
+const seedProperties = [
+  ['p1','Barrier Reef Retreat','#7b4ad9',3,'',''],['p2','SeaBreeze','#2f80ed',3,'',''],['p3','Solas Sands','#72bf44',2.5,'',''],['p4','Paradise Palms','#ff8a3d',3,'',''],['p5','Moorings','#ef5b93',2,'',''],['p6','Loka 8','#f4c20d',2.5,'',''],['p7','Loka 12','#67c7d4',2.5,'',''],['p8','Seaside','#14a0a0',2.5,'',''],['p9','The Loft','#8aae66',2.5,'',''],['p10','Paradise Lights','#ff80b5',2.5,'','']
+].map(([id,name,colour,hours,address,access])=>({id,name,colour,hours,address,access}));
+const seedBookings = [
+  ['b1','p1','Emma & Nick',-2,3],['b2','p1','Jason & Mel',7,10],['b3','p1','TBC',15,19],['b4','p2','Jake',1,5],['b5','p2','Lisa & Tom',8,11],['b6','p2','Ryan Family',14,18],['b7','p3','Steve',-3,2],['b8','p3','The Millers',7,11],['b9','p3','TBC',13,17],['b10','p4','David',-2,3],['b11','p4','Sophie & Mark',7,11],['b12','p5','Sarah',-2,3],['b13','p5','TBC',9,16],['b14','p6','Ben & Jess',2,6],['b15','p6','TBC',9,14],['b16','p7','Olivia',3,7],['b17','p7','TBC',10,17],['b18','p8','Aaron',-2,3],['b19','p8','TBC',10,17],['b20','p9','Chris & Pat',-1,5],['b21','p9','TBC',8,16],['b22','p10','Hannah',0,5],['b23','p10','TBC',9,16]
+].map(([id,propertyId,guest,start,end])=>({id,propertyId,guest,checkIn:addDaysISO(start),checkOut:addDaysISO(end),status:'pending'}));
+let state = {
+  start: addDays(startOfDay(new Date()), -7),
+  selectedColour: colours[0],
+  selectedBookingId: null,
+  properties: JSON.parse(localStorage.getItem('cindyProperties') || 'null') || seedProperties,
+  bookings: JSON.parse(localStorage.getItem('cindyBookings') || 'null') || seedBookings,
+  completions: JSON.parse(localStorage.getItem('cindyCompletions') || '[]')
+};
 
-document.addEventListener('DOMContentLoaded',init);
-function init(){bind();loadLocal();render();loadRemote();}
-function bind(){
- addStayBtn.onclick=()=>openStay(); jumpTodayBtn.onclick=()=>{timelineStart=startOfDay(addDays(new Date(),-7));renderTimeline();setTimeout(()=>timeline.scrollLeft=320,60)};
- closeStayBtn.onclick=()=>stayDialog.close(); stayForm.onsubmit=saveStay; deleteStayBtn.onclick=deleteStay; issueFromStayBtn.onclick=()=>{const i=Number(editIndex.value);stayDialog.close();openIssue(i)};
- closeIssueBtn.onclick=()=>issueDialog.close(); issueForm.onsubmit=saveIssue;
- feedbackBtn.onclick=()=>feedbackDialog.showModal(); closeFeedbackBtn.onclick=()=>feedbackDialog.close(); feedbackForm.onsubmit=saveFeedback;
+document.addEventListener('DOMContentLoaded', init);
+function init(){
+  addPropertyBtn.onclick=()=>openProperty(); cancelPropertyBtn.onclick=()=>propertyDialog.close(); propertyForm.onsubmit=saveProperty;
+  addBookingBtn.onclick=()=>openBooking(); cancelBookingBtn.onclick=()=>bookingDialog.close(); bookingForm.onsubmit=saveBooking; deleteBookingBtn.onclick=deleteBooking;
+  closeDetailBtn.onclick=()=>detailDialog.close(); editStayBtn.onclick=()=>{detailDialog.close();openBooking(state.selectedBookingId)}; completeStayBtn.onclick=()=>openComplete(state.selectedBookingId); issueStayBtn.onclick=()=>alert('Issue capture is next: this will save issue type, notes and photos later.');
+  cancelCompleteBtn.onclick=()=>completeDialog.close(); completeForm.onsubmit=saveCompletion;
+  prevBtn.onclick=()=>shift(-14); nextBtn.onclick=()=>shift(14); todayBtn.onclick=()=>{state.start=addDays(startOfDay(new Date()),-7);render();};
+  showPropertiesBtn.onclick=()=>openPropertyList(); showTodayBtn.onclick=()=>scrollToday();
+  document.querySelectorAll('.counter button').forEach(btn=>btn.onclick=()=>stepBed(btn.dataset.bed, Number(btn.dataset.step)));
+  buildColourChoices(); render(); setTimeout(scrollToday,250);
 }
-function loadLocal(){stays=JSON.parse(localStorage.getItem('cindy_stays')||'null')||sampleStays;issues=JSON.parse(localStorage.getItem('cindy_issues')||'[]');}
-function saveLocal(){localStorage.setItem('cindy_stays',JSON.stringify(stays));localStorage.setItem('cindy_issues',JSON.stringify(issues));}
-async function loadRemote(){try{if(!SCRIPT_URL)return;const r=await fetch(`${SCRIPT_URL}?action=getBookings`);const d=await r.json();if(d.bookings&&d.bookings.length){stays=d.bookings.map(normaliseStay);saveLocal();render();}}catch(e){console.log('Using local data',e)}}
-function normaliseStay(b){return{property:b.property||b.Property||'',guest:b.guest||b.Guest||'',checkIn:b.checkIn||b.CheckIn||b['Check In']||'',checkOut:b.checkOut||b.CheckOut||b['Check Out']||'',status:b.status||b.Status||'pending'}}
-function render(){renderSummary();renderTimeline();renderToday();}
-function renderSummary(){const today=iso(new Date());const cleans=stays.filter(s=>s.checkOut===today);const done=cleans.filter(s=>s.status==='done').length;summaryText.textContent=`${stays.length} stays loaded`;todayTitle.textContent=`${cleans.length} cleans`;progressText.textContent=`${done} / ${cleans.length}`;nextClean.textContent=cleans.find(s=>s.status!=='done')?.property||'All clear';cleanCount.textContent=cleans.length;}
+function persist(){localStorage.setItem('cindyProperties',JSON.stringify(state.properties));localStorage.setItem('cindyBookings',JSON.stringify(state.bookings));localStorage.setItem('cindyCompletions',JSON.stringify(state.completions));}
+function shift(days){state.start=addDays(state.start,days);render();}
+function render(){renderHeader();renderTimeline();}
+function renderHeader(){monthTitle.textContent=state.start.toLocaleDateString('en-AU',{month:'long',year:'numeric'}).toUpperCase();}
 function renderTimeline(){
- timeline.innerHTML='';const days=Array.from({length:35},(_,i)=>addDays(timelineStart,i));const homes=[...new Set(stays.map(s=>s.property).filter(Boolean))].sort();const grid=document.createElement('div');grid.className='timeline-grid';
- const corner=document.createElement('div');corner.className='corner';corner.style.gridColumn='1';corner.style.gridRow='1 / span 2';grid.appendChild(corner);
- let monthStart=0;for(let i=0;i<days.length;i++){const next=days[i+1];if(!next||next.getMonth()!==days[i].getMonth()){const m=document.createElement('div');m.className='month-head';m.textContent=days[i].toLocaleDateString('en-AU',{month:'long'});m.style.gridColumn=`${monthStart+2} / ${i+3}`;m.style.gridRow='1';grid.appendChild(m);monthStart=i+1;}}
- days.forEach((d,i)=>{const h=document.createElement('div');h.className='day-head';h.innerHTML=`${d.toLocaleDateString('en-AU',{weekday:'short'})}<br>${d.getDate()}`;h.style.gridColumn=i+2;h.style.gridRow='2';grid.appendChild(h)});
- homes.forEach((home,rowIndex)=>{const row=rowIndex+3;const name=document.createElement('div');name.className='home-name';name.textContent=home;name.style.gridColumn='1';name.style.gridRow=row;grid.appendChild(name);days.forEach((d,i)=>{const c=document.createElement('div');c.className='cell'+(iso(d)===iso(new Date())?' today-col':'');c.style.gridColumn=i+2;c.style.gridRow=row;grid.appendChild(c)});stays.forEach((s,index)=>{if(s.property!==home)return;const start=diffDays(timelineStart,new Date(s.checkIn));const end=diffDays(timelineStart,new Date(s.checkOut));if(end<=0||start>=35)return;const visibleStart=Math.max(0,start);const visibleEnd=Math.min(35,end);const bar=document.createElement('div');bar.className=`stay ${colourFor(s)}`;bar.textContent=s.guest||'Guest';bar.title=`${s.property} - ${s.guest}`;bar.style.gridColumn=`${visibleStart+2} / ${visibleEnd+2}`;bar.style.gridRow=row;bar.onclick=()=>openStay(index);bar.oncontextmenu=e=>{e.preventDefault();openIssue(index)};grid.appendChild(bar)});});
- if(!homes.length){const empty=document.createElement('div');empty.className='home-name';empty.textContent='Tap +';empty.style.gridColumn='1';empty.style.gridRow='3';grid.appendChild(empty)}
- timeline.appendChild(grid);setTimeout(()=>{if(timeline.scrollLeft<10)timeline.scrollLeft=300},40);
+  timeline.innerHTML=''; const days=Array.from({length:56},(_,i)=>addDays(state.start,i)); const grid=document.createElement('div'); grid.className='grid';
+  grid.appendChild(div('corner',''));
+  days.forEach(d=>{const h=div('day-head'+(iso(d)===iso(new Date())?' today':''), `${d.toLocaleDateString('en-AU',{weekday:'short'}).toUpperCase()}<strong>${d.getDate()}</strong>${d.getDate()===1?'<small>'+d.toLocaleDateString('en-AU',{month:'short'}).toUpperCase()+'</small>':''}`); grid.appendChild(h);});
+  state.properties.forEach(p=>{const pc=div('prop-cell',`<span class="colour-dot" style="background:${p.colour}"></span><span>${p.name}</span>`); pc.style.background=`linear-gradient(90deg, ${hexAlpha(p.colour,.28)}, ${hexAlpha(p.colour,.12)})`; pc.onclick=()=>openProperty(p.id); grid.appendChild(pc); days.forEach(()=>grid.appendChild(div('day-cell','')));});
+  timeline.appendChild(grid);
+  const todayOff=offsetDays(state.start,startOfDay(new Date())); if(todayOff>=0&&todayOff<56){const line=div('today-line',''); line.style.left=`calc(var(--left) + ${todayOff} * var(--cell) + var(--cell) / 2)`; timeline.appendChild(line);}
+  state.bookings.forEach(b=>placeStay(b));
 }
-function renderToday(){const today=iso(new Date());const cleans=stays.filter(s=>s.checkOut===today);todayList.innerHTML='';if(!cleans.length){todayList.innerHTML='<div class="clean-item"><strong>No checkouts today</strong><p>Nice. Check the planner for upcoming stays.</p></div>';return}cleans.forEach(s=>{const i=stays.indexOf(s);const div=document.createElement('div');div.className='clean-item';div.innerHTML=`<strong>${s.property}</strong><p>${s.guest}</p><p>Checkout 10:00am</p><div class="today-actions"><button class="primary" data-done="${i}">${s.status==='done'?'Done ✓':'Complete'}</button><button data-edit="${i}">Edit</button><button data-issue="${i}">Issue</button></div>`;todayList.appendChild(div)});todayList.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>completeStay(Number(b.dataset.done)));todayList.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openStay(Number(b.dataset.edit)));todayList.querySelectorAll('[data-issue]').forEach(b=>b.onclick=()=>openIssue(Number(b.dataset.issue)));}
-function openStay(index=null){stayForm.reset();editIndex.value=index??'';deleteStayBtn.classList.toggle('hidden',index===null);issueFromStayBtn.classList.toggle('hidden',index===null);stayDialogTitle.textContent=index===null?'Add Stay':'Edit Stay';if(index!==null){const s=stays[index];propertyInput.value=s.property;guestInput.value=s.guest;checkInInput.value=s.checkIn;checkOutInput.value=s.checkOut;statusInput.value=s.status||'pending'}else{checkInInput.value=iso(new Date());checkOutInput.value=iso(addDays(new Date(),2));statusInput.value='pending'}stayDialog.showModal();}
-function saveStay(e){e.preventDefault();const s={property:propertyInput.value.trim(),guest:guestInput.value.trim(),checkIn:checkInInput.value,checkOut:checkOutInput.value,status:statusInput.value};if(!s.property||!s.guest||!s.checkIn||!s.checkOut)return;if(s.checkOut<=s.checkIn){toast('Check out must be after check in');return}const idx=editIndex.value===''?null:Number(editIndex.value);if(idx===null)stays.push(s);else stays[idx]=s;saveLocal();render();stayDialog.close();sendToSheet('saveBooking',s);toast(idx===null?'Stay added':'Stay updated');}
-function deleteStay(){const idx=Number(editIndex.value);if(Number.isNaN(idx))return;if(!confirm('Delete this stay?'))return;stays.splice(idx,1);saveLocal();render();stayDialog.close();toast('Stay deleted')}
-function completeStay(i){stays[i].status='done';saveLocal();render();sendToSheet('saveBooking',stays[i]);toast('Nice work. Clean complete ✓')}
-function openIssue(i){issueForm.reset();issueIndex.value=i;issueDialog.showModal()}
-function saveIssue(e){e.preventDefault();const i=Number(issueIndex.value);const s=stays[i];const issue={date:new Date().toISOString(),property:s.property,guest:s.guest,type:issueTypeInput.value,notes:issueNotesInput.value.trim(),status:'open'};issues.push(issue);stays[i].status='issue';saveLocal();render();issueDialog.close();sendToSheet('saveIssue',issue);toast('Issue saved')}
-function saveFeedback(e){e.preventDefault();const feedback={date:new Date().toISOString(),comment:feedbackInput.value.trim()};feedbackDialog.close();feedbackForm.reset();sendToSheet('saveFeedback',feedback);toast('Feedback sent')}
-async function sendToSheet(action,data){try{if(!SCRIPT_URL)return;await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action,data})})}catch(e){console.log('Sheet sync skipped',action,data)}}
-function colourFor(s){const today=iso(new Date());if(s.status==='issue')return'issue';if(s.checkOut===today)return'today';if(s.checkOut<today)return'past';return'future'}
-function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x}function iso(d){return startOfDay(d).toISOString().slice(0,10)}function diffDays(a,b){return Math.round((startOfDay(b)-startOfDay(a))/DAY_MS)}function toast(msg){toast.textContent=msg;toast.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>toast.classList.add('hidden'),2200)}
+function placeStay(b){
+  const p=propertyById(b.propertyId); if(!p)return; const row=state.properties.findIndex(x=>x.id===p.id); const start=offsetDays(state.start,new Date(b.checkIn)); const end=offsetDays(state.start,new Date(b.checkOut)); if(end<0||start>55)return; const visibleStart=Math.max(0,start); const visibleEnd=Math.min(56,end); const nights=Math.max(1,visibleEnd-visibleStart);
+  const stay=div('stay',`<span class="name">${b.guest}</span>`); stay.style.color=p.colour; stay.style.left=`calc(var(--left) + ${visibleStart} * var(--cell) + calc(var(--cell) / 2))`; stay.style.top=`calc(52px + ${row} * var(--row) + 15px)`; stay.style.width=`calc(${nights} * var(--cell))`; stay.onclick=()=>openDetail(b.id); timeline.appendChild(stay);
+  const checkout=offsetDays(state.start,new Date(b.checkOut)); if(checkout>=0&&checkout<56){const dot=div('clean-dot',''); dot.style.left=`calc(var(--left) + ${checkout} * var(--cell) + calc(var(--cell) / 2) - 11px)`; dot.style.top=`calc(52px + ${row} * var(--row) + 26px)`; timeline.appendChild(dot);} 
+}
+function openProperty(id=null){const p=id?propertyById(id):null; propertyDialogTitle.textContent=p?'Edit Property':'Add Property'; propertyId.value=p?.id||''; propertyName.value=p?.name||''; propertyHours.value=p?.hours||2.5; propertyAddress.value=p?.address||''; propertyAccess.value=p?.access||''; state.selectedColour=p?.colour||colours[state.properties.length%colours.length]; buildColourChoices(); propertyDialog.showModal();}
+function saveProperty(e){e.preventDefault(); const id=propertyId.value||uid('p'); const data={id,name:propertyName.value.trim(),colour:state.selectedColour,hours:Number(propertyHours.value||0),address:propertyAddress.value.trim(),access:propertyAccess.value.trim()}; const i=state.properties.findIndex(p=>p.id===id); if(i>=0)state.properties[i]=data; else state.properties.push(data); persist(); propertyDialog.close(); render();}
+function buildColourChoices(){colourChoices.innerHTML=''; colours.forEach(c=>{const b=document.createElement('button'); b.type='button'; b.className='colour-choice'+(c===state.selectedColour?' selected':''); b.style.background=c; b.onclick=()=>{state.selectedColour=c;buildColourChoices();}; colourChoices.appendChild(b);});}
+function openBooking(id=null){const b=id?bookingById(id):null; bookingDialogTitle.textContent=b?'Edit Stay':'Add Stay'; bookingId.value=b?.id||''; bookingGuest.value=b?.guest||''; bookingCheckIn.value=b?.checkIn||iso(new Date()); bookingCheckOut.value=b?.checkOut||iso(addDays(new Date(),2)); renderPropertySelect(b?.propertyId); deleteBookingBtn.style.visibility=b?'visible':'hidden'; bookingDialog.showModal();}
+function renderPropertySelect(selected){bookingProperty.innerHTML=''; state.properties.forEach(p=>{const o=document.createElement('option'); o.value=p.id; o.textContent=p.name; if(p.id===selected)o.selected=true; bookingProperty.appendChild(o);});}
+function saveBooking(e){e.preventDefault(); const id=bookingId.value||uid('b'); const data={id,propertyId:bookingProperty.value,guest:bookingGuest.value.trim(),checkIn:bookingCheckIn.value,checkOut:bookingCheckOut.value,status:'pending'}; const i=state.bookings.findIndex(b=>b.id===id); if(i>=0)state.bookings[i]=data; else state.bookings.push(data); persist(); bookingDialog.close(); render();}
+function deleteBooking(){const id=bookingId.value;if(!id)return;if(confirm('Delete this stay?')){state.bookings=state.bookings.filter(b=>b.id!==id);persist();bookingDialog.close();render();}}
+function openDetail(id){state.selectedBookingId=id; const b=bookingById(id),p=propertyById(b.propertyId); detailTitle.textContent=b.guest; detailProperty.innerHTML=`<span class="colour-dot" style="display:inline-block;background:${p.colour}"></span> ${p.name}`; detailCheckIn.textContent=formatDate(b.checkIn)+' (PM)'; detailCheckOut.textContent=formatDate(b.checkOut)+' (AM)'; detailNights.textContent=stayLength(b); detailDialog.showModal();}
+function openComplete(id){const b=bookingById(id),p=propertyById(b.propertyId); completeSub.textContent=`${p.name} • ${b.guest}`; completeForm.dataset.bookingId=id; bedKing.value=0; bedQueen.value=0; bedSingle.value=0; completeNotes.value=''; detailDialog.close(); completeDialog.showModal();}
+function saveCompletion(e){e.preventDefault(); const b=bookingById(completeForm.dataset.bookingId); state.completions.push({id:uid('c'),bookingId:b.id,propertyId:b.propertyId,guest:b.guest,date:iso(new Date()),king:Number(bedKing.value),queen:Number(bedQueen.value),single:Number(bedSingle.value),notes:completeNotes.value.trim()}); b.status='complete'; persist(); completeDialog.close(); render(); alert('Saved for invoice notes');}
+function stepBed(bed,step){const el={king:bedKing,queen:bedQueen,single:bedSingle}[bed]; el.value=Math.max(0,Number(el.value||0)+step);}
+function openPropertyList(){alert('Property list is now stored. Tap any property name on the left to edit colour, address, access notes and default clean time.');}
+function scrollToday(){const todayOff=offsetDays(state.start,startOfDay(new Date())); document.querySelector('.timeline-wrap').scrollLeft=Math.max(0, todayOff*58-260);}
+function propertyById(id){return state.properties.find(p=>p.id===id)} function bookingById(id){return state.bookings.find(b=>b.id===id)}
+function div(cls,html){const e=document.createElement('div'); e.className=cls; e.innerHTML=html; return e;} function uid(p){return p+Math.random().toString(36).slice(2,9)}
+function startOfDay(d){const x=new Date(d); x.setHours(0,0,0,0); return x;} function addDays(d,n){const x=new Date(d); x.setDate(x.getDate()+n); return x;} function addDaysISO(n){return iso(addDays(new Date(),n));}
+function iso(d){return startOfDay(new Date(d)).toISOString().slice(0,10)} function offsetDays(a,b){return Math.round((startOfDay(b)-startOfDay(a))/86400000)}
+function stayLength(b){return Math.max(1,offsetDays(new Date(b.checkIn),new Date(b.checkOut)))} function formatDate(s){return new Date(s+'T00:00:00').toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})}
+function hexAlpha(hex,a){const h=hex.replace('#',''); const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16); return `rgba(${r},${g},${b},${a})`;}
