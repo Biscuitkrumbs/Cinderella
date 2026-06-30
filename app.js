@@ -1,24 +1,75 @@
-const colours=["#7b4ce2","#2f80ed","#76c442","#ff8a3d","#ec5b94","#f7c415","#65c8d4","#8cab70","#00a9a5","#f0a4e8"];
-let state={start:addDays(today(),-7),properties:[],stays:[],selectedColour:colours[0]};
-const seedProperties=[
-{id:id(),name:"Barrier Reef Retreat",colour:colours[0],address:"",notes:""},{id:id(),name:"SeaBreeze",colour:colours[1],address:"",notes:""},{id:id(),name:"Solas Sands",colour:colours[2],address:"",notes:""},{id:id(),name:"Paradise Palms",colour:colours[3],address:"",notes:""},{id:id(),name:"Moorings",colour:colours[4],address:"",notes:""},{id:id(),name:"Loka 8",colour:colours[5],address:"",notes:""},{id:id(),name:"Loka 12",colour:colours[6],address:"",notes:""},{id:id(),name:"Seaside",colour:colours[8],address:"",notes:""},{id:id(),name:"The Loft",colour:colours[7],address:"",notes:""},{id:id(),name:"Paradise Lights",colour:colours[4],address:"",notes:""}
+const properties = [
+  { name:'Barrier Reef Retreat', color:'#7b4ce2' },
+  { name:'SeaBreeze', color:'#2f80ed' },
+  { name:'Solas Sands', color:'#6cbc2f' },
+  { name:'Paradise Palms', color:'#ff8a35' },
+  { name:'Moorings', color:'#ec5d95' },
+  { name:'Loka 8', color:'#f3c300' },
+  { name:'Loka 12', color:'#64c7d8' },
+  { name:'Seaside', color:'#22a6a7' },
+  { name:'The Loft', color:'#7da63b' },
+  { name:'Paradise Lights', color:'#f062a4' }
 ];
-function seedStays(){const p=state.properties;return[
-{id:id(),propertyId:p[0].id,guest:"Emma & Nick",checkIn:iso(addDays(today(),-2)),checkOut:iso(addDays(today(),3)),done:false},{id:id(),propertyId:p[0].id,guest:"Jason & Mel",checkIn:iso(addDays(today(),7)),checkOut:iso(addDays(today(),10)),done:false},{id:id(),propertyId:p[1].id,guest:"Jake",checkIn:iso(addDays(today(),1)),checkOut:iso(addDays(today(),5)),done:false},{id:id(),propertyId:p[2].id,guest:"Steve",checkIn:iso(addDays(today(),-3)),checkOut:iso(addDays(today(),2)),done:false},{id:id(),propertyId:p[3].id,guest:"David",checkIn:iso(addDays(today(),-2)),checkOut:iso(addDays(today(),3)),done:false},{id:id(),propertyId:p[4].id,guest:"Sarah",checkIn:iso(addDays(today(),-1)),checkOut:iso(addDays(today(),4)),done:false},{id:id(),propertyId:p[5].id,guest:"Ben & Jess",checkIn:iso(addDays(today(),2)),checkOut:iso(addDays(today(),6)),done:false},{id:id(),propertyId:p[6].id,guest:"Olivia",checkIn:iso(addDays(today(),4)),checkOut:iso(addDays(today(),8)),done:false},{id:id(),propertyId:p[8].id,guest:"Chris & Pat",checkIn:iso(addDays(today(),-1)),checkOut:iso(addDays(today(),5)),done:false},{id:id(),propertyId:p[9].id,guest:"Hannah",checkIn:iso(addDays(today(),0)),checkOut:iso(addDays(today(),6)),done:false}
-]}
-document.addEventListener("DOMContentLoaded",()=>{load();bind();render();});
-function bind(){todayBtn.onclick=()=>{state.start=addDays(today(),-7);render()};backBtn.onclick=()=>{state.start=addDays(state.start,-14);render()};forwardBtn.onclick=()=>{state.start=addDays(state.start,14);render()};addPropertyBtn.onclick=()=>openProperty();addStayBtn.onclick=()=>openStay();cancelPropertyBtn.onclick=()=>propertyDialog.close();propertyForm.onsubmit=saveProperty;cancelStayBtn.onclick=()=>stayDialog.close();stayForm.onsubmit=saveStay;deleteStayBtn.onclick=deleteStay;cancelCompleteBtn.onclick=()=>completeDialog.close();completeForm.onsubmit=saveComplete;renderColours();}
-function load(){state.properties=JSON.parse(localStorage.getItem("properties")||"null")||seedProperties;state.stays=JSON.parse(localStorage.getItem("stays")||"null")||seedStays();}
-function persist(){localStorage.setItem("properties",JSON.stringify(state.properties));localStorage.setItem("stays",JSON.stringify(state.stays));}
-function render(){monthTitle.textContent=state.start.toLocaleDateString("en-AU",{month:"long",year:"numeric"}).toUpperCase();renderTimeline();}
-function renderTimeline(){const days=Array.from({length:42},(_,i)=>addDays(state.start,i));const grid=document.createElement("div");grid.className="grid";grid.append(el("div","corner",""));days.forEach(d=>grid.append(el("div","date-cell"+(same(d,today())?" today":""),`<small>${d.toLocaleDateString("en-AU",{weekday:"short"})}</small>${d.getDate()}`)));state.properties.forEach((p,row)=>{const label=el("div","property-label",`<span class="property-dot" style="background:${p.colour}"></span><span>${p.name}</span>`);label.style.background=fade(p.colour,.22);label.onclick=()=>openProperty(p.id);grid.append(label);days.forEach((d,i)=>{const bg=el("div","day-bg"+(same(d,today())?" today-line":""),"");grid.append(bg)});state.stays.filter(s=>s.propertyId===p.id).forEach(s=>{const start=diffDays(state.start,new Date(s.checkIn));const end=diffDays(state.start,new Date(s.checkOut));if(end<=0||start>=42)return;const visibleStart=Math.max(0,start);const visibleEnd=Math.min(42,end);const bar=el("div","stay"+(s.done?" done":""),s.guest);bar.style.color=p.colour;bar.style.gridColumn=`${visibleStart+2} / span ${Math.max(1,visibleEnd-visibleStart)}`;bar.style.gridRow=row+2;bar.onclick=()=>openStay(s.id);grid.append(bar);const clean=el("div","clean-dot","");clean.style.gridColumn=`${Math.min(42,visibleEnd)+1}`;clean.style.gridRow=row+2;clean.onclick=()=>openComplete(s.id);grid.append(clean);});});timeline.innerHTML="";timeline.append(grid);}
-function openProperty(pid=""){const p=state.properties.find(x=>x.id===pid);propertyDialogTitle.textContent=p?"Edit Property":"Add Property";propertyId.value=p?.id||"";propertyName.value=p?.name||"";propertyAddress.value=p?.address||"";propertyNotes.value=p?.notes||"";state.selectedColour=p?.colour||colours[0];renderColours();propertyDialog.showModal();}
-function renderColours(){if(!colourChoices)return;colourChoices.innerHTML="";colours.forEach(c=>{const b=el("button","colour-choice"+(c===state.selectedColour?" selected":""),"");b.type="button";b.style.background=c;b.onclick=()=>{state.selectedColour=c;renderColours()};colourChoices.append(b);});}
-function saveProperty(e){e.preventDefault();const data={id:propertyId.value||id(),name:propertyName.value.trim(),colour:state.selectedColour,address:propertyAddress.value.trim(),notes:propertyNotes.value.trim()};const idx=state.properties.findIndex(p=>p.id===data.id);if(idx>=0)state.properties[idx]=data;else state.properties.push(data);persist();propertyDialog.close();render();}
-function openStay(sid=""){fillPropertySelect();const s=state.stays.find(x=>x.id===sid);stayDialogTitle.textContent=s?"Edit Stay":"Add Stay";stayId.value=s?.id||"";stayProperty.value=s?.propertyId||state.properties[0]?.id||"";stayGuest.value=s?.guest||"";stayCheckIn.value=s?.checkIn||iso(today());stayCheckOut.value=s?.checkOut||iso(addDays(today(),2));deleteStayBtn.style.display=s?"block":"none";stayDialog.showModal();}
-function fillPropertySelect(){stayProperty.innerHTML="";state.properties.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;stayProperty.append(o);});}
-function saveStay(e){e.preventDefault();const data={id:stayId.value||id(),propertyId:stayProperty.value,guest:stayGuest.value.trim(),checkIn:stayCheckIn.value,checkOut:stayCheckOut.value,done:false};const idx=state.stays.findIndex(s=>s.id===data.id);if(idx>=0)data.done=state.stays[idx].done;if(idx>=0)state.stays[idx]=data;else state.stays.push(data);persist();stayDialog.close();render();}
-function deleteStay(){if(!stayId.value)return;if(confirm("Delete this stay?")){state.stays=state.stays.filter(s=>s.id!==stayId.value);persist();stayDialog.close();render();}}
-function openComplete(sid){completeStayId.value=sid;bedsKing.value=0;bedsQueen.value=0;bedsSingle.value=0;completeNotes.value="";completeDialog.showModal();}
-function saveComplete(e){e.preventDefault();const s=state.stays.find(x=>x.id===completeStayId.value);if(s){s.done=true;s.complete={date:new Date().toISOString(),king:+bedsKing.value,queen:+bedsQueen.value,single:+bedsSingle.value,notes:completeNotes.value.trim()};persist();}completeDialog.close();render();}
-function el(tag,cls,html){const x=document.createElement(tag);x.className=cls;x.innerHTML=html;return x}function today(){const d=new Date();d.setHours(0,0,0,0);return d}function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}function iso(d){return d.toISOString().slice(0,10)}function same(a,b){return iso(a)===iso(b)}function diffDays(a,b){const x=new Date(a),y=new Date(b);x.setHours(0,0,0,0);y.setHours(0,0,0,0);return Math.round((y-x)/86400000)}function id(){return crypto.randomUUID?crypto.randomUUID():String(Date.now()+Math.random())}function fade(hex,a){const h=hex.replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return `rgba(${r},${g},${b},${a})`}
+const stays = [
+  { property:'Barrier Reef Retreat', guest:'Emma & Nick', in:'2025-07-16', out:'2025-07-20' },
+  { property:'Barrier Reef Retreat', guest:'Jason & Mel', in:'2025-07-24', out:'2025-07-27' },
+  { property:'Barrier Reef Retreat', guest:'TBC', in:'2025-08-01', out:'2025-08-05' },
+  { property:'SeaBreeze', guest:'Jake', in:'2025-07-18', out:'2025-07-22' },
+  { property:'SeaBreeze', guest:'Lisa & Tom', in:'2025-07-25', out:'2025-07-28' },
+  { property:'SeaBreeze', guest:'Ryan Family', in:'2025-07-31', out:'2025-08-03' },
+  { property:'Solas Sands', guest:'Steve', in:'2025-07-15', out:'2025-07-20' },
+  { property:'Solas Sands', guest:'The Millers', in:'2025-07-24', out:'2025-07-28' },
+  { property:'Paradise Palms', guest:'David', in:'2025-07-16', out:'2025-07-20' },
+  { property:'Paradise Palms', guest:'Sophie & Mark', in:'2025-07-24', out:'2025-07-28' },
+  { property:'Moorings', guest:'Sarah', in:'2025-07-16', out:'2025-07-21' },
+  { property:'Moorings', guest:'TBC', in:'2025-07-27', out:'2025-08-03' },
+  { property:'Loka 8', guest:'Ben & Jess', in:'2025-07-19', out:'2025-07-23' },
+  { property:'Loka 12', guest:'Olivia', in:'2025-07-20', out:'2025-07-24' },
+  { property:'Seaside', guest:'Aaron', in:'2025-07-16', out:'2025-07-20' },
+  { property:'The Loft', guest:'Chris & Pat', in:'2025-07-17', out:'2025-07-22' },
+  { property:'Paradise Lights', guest:'Hannah', in:'2025-07-17', out:'2025-07-22' }
+];
+const CELL = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell-w')) || 64;
+const startDate = new Date('2025-07-14T00:00:00');
+const days = Array.from({length:42},(_,i)=>addDays(startDate,i));
+const propertyColumn = document.getElementById('propertyColumn');
+const timeline = document.getElementById('timeline');
+const timelineWrap = document.getElementById('timelineWrap');
+const monthTitle = document.getElementById('monthTitle');
+function init(){render(); setTimeout(()=>timelineWrap.scrollLeft = CELL * 1.7, 50);}
+function render(){
+  monthTitle.textContent = 'JULY 2025';
+  propertyColumn.innerHTML=''; timeline.innerHTML='';
+  days.forEach((d,i)=>{
+    const h=document.createElement('div'); h.className='day-header'+(iso(d)==='2025-07-17'?' today':''); h.style.left=`${i*CELL}px`; h.innerHTML=`<span class="dow">${d.toLocaleDateString('en-AU',{weekday:'short'})}</span><span class="num">${d.getDate()}</span>`; timeline.appendChild(h);
+  });
+  properties.forEach((p,row)=>{
+    const pr=document.createElement('div'); pr.className='property-row'; pr.style.background=soft(p.color); pr.textContent=p.name; propertyColumn.appendChild(pr);
+    const gr=document.createElement('div'); gr.className='grid-row'; gr.style.top=`${row*rowHeight()+62}px`; timeline.appendChild(gr);
+    stays.filter(s=>s.property===p.name).forEach(s=>addStay(s,p,row));
+  });
+  timeline.style.height = `${62 + properties.length*rowHeight()}px`;
+}
+function addStay(s,p,row){
+  const inOff = diffDays(startDate, new Date(s.in+'T00:00:00'));
+  const outOff = diffDays(startDate, new Date(s.out+'T00:00:00'));
+  if(outOff<0 || inOff>days.length) return;
+  const left = (inOff + .5) * CELL;
+  const width = Math.max(CELL, (outOff - inOff - 1) * CELL);
+  const bar=document.createElement('div');
+  bar.className='booking'; bar.style.color=p.color; bar.style.left=`${left}px`; bar.style.top=`${62 + row*rowHeight() + 18}px`; bar.style.width=`${width}px`; bar.innerHTML=`<span>${s.guest}</span>`;
+  timeline.appendChild(bar);
+  const dot=document.createElement('div'); dot.className='checkout'; dot.style.left=`${outOff*CELL - 10}px`; dot.style.top=`${62 + row*rowHeight() + 29}px`; timeline.appendChild(dot);
+}
+function rowHeight(){return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--row-h')) || 78}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function iso(d){return d.toISOString().slice(0,10)}
+function diffDays(a,b){return Math.round((b-a)/86400000)}
+function soft(hex){
+  const c=hex.replace('#',''); const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);
+  return `linear-gradient(90deg, rgba(${r},${g},${b},.24), rgba(${r},${g},${b},.11))`;
+}
+document.getElementById('todayBtn').onclick=()=>timelineWrap.scrollLeft=CELL*2;
+document.getElementById('backBtn').onclick=()=>timelineWrap.scrollBy({left:-CELL*7,behavior:'smooth'});
+document.getElementById('forwardBtn').onclick=()=>timelineWrap.scrollBy({left:CELL*7,behavior:'smooth'});
+init();

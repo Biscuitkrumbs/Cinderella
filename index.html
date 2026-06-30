@@ -9,76 +9,27 @@
 <body>
   <header class="topbar">
     <div class="brand">Cinderella</div>
-    <div class="top-actions">
-      <button id="todayBtn">Today</button>
-      <button id="addPropertyBtn">+ Property</button>
-      <button id="addStayBtn" class="primary">+ Stay</button>
+    <div class="title">
+      <button id="backBtn" class="icon-btn">‹</button>
+      <h1 id="monthTitle">Timeline</h1>
+      <button id="forwardBtn" class="icon-btn">›</button>
     </div>
+    <button id="todayBtn" class="pill-btn">Today</button>
   </header>
 
-  <main class="app">
-    <section class="timeline-card">
-      <div class="timeline-head">
-        <button id="backBtn">‹</button>
-        <h1 id="monthTitle">Timeline</h1>
-        <button id="forwardBtn">›</button>
-      </div>
-      <p class="hint">One line = one night. Property colours stay the same as the key rings.</p>
-      <div id="timeline" class="timeline"></div>
+  <main class="app-shell">
+    <aside class="property-column" id="propertyColumn"></aside>
+    <section class="timeline-wrap" id="timelineWrap">
+      <div class="timeline" id="timeline"></div>
     </section>
   </main>
 
-  <dialog id="propertyDialog">
-    <form id="propertyForm" method="dialog">
-      <h2 id="propertyDialogTitle">Add Property</h2>
-      <input id="propertyId" type="hidden" />
-      <label>Property name<input id="propertyName" required /></label>
-      <label>Colour</label>
-      <div id="colourChoices" class="colour-choices"></div>
-      <label>Address<input id="propertyAddress" /></label>
-      <label>Access / key notes<textarea id="propertyNotes" rows="3"></textarea></label>
-      <div class="dialog-actions">
-        <button type="button" id="cancelPropertyBtn">Cancel</button>
-        <button class="primary" type="submit">Save</button>
-      </div>
-    </form>
-  </dialog>
+  <footer class="legend">
+    <span><i class="mini-cell"></i> 1 night</span>
+    <span><i class="clean-dot"></i> checkout / clean</span>
+    <span class="hint">Swipe left or right to scroll timeline</span>
+  </footer>
 
-  <dialog id="stayDialog">
-    <form id="stayForm" method="dialog">
-      <h2 id="stayDialogTitle">Add Stay</h2>
-      <input id="stayId" type="hidden" />
-      <label>Property<select id="stayProperty" required></select></label>
-      <label>Guest names<input id="stayGuest" required /></label>
-      <label>Check in<input id="stayCheckIn" type="date" required /></label>
-      <label>Check out<input id="stayCheckOut" type="date" required /></label>
-      <div class="dialog-actions split">
-        <button type="button" id="deleteStayBtn" class="danger">Delete</button>
-        <span></span>
-        <button type="button" id="cancelStayBtn">Cancel</button>
-        <button class="primary" type="submit">Save</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="completeDialog">
-    <form id="completeForm" method="dialog">
-      <h2>Complete Clean</h2>
-      <input id="completeStayId" type="hidden" />
-      <div class="bed-grid">
-        <label>King<input id="bedsKing" type="number" min="0" value="0" /></label>
-        <label>Queen<input id="bedsQueen" type="number" min="0" value="0" /></label>
-        <label>Single<input id="bedsSingle" type="number" min="0" value="0" /></label>
-      </div>
-      <label>Invoice notes<textarea id="completeNotes" rows="4" placeholder="Anything extra for invoice later"></textarea></label>
-      <div class="dialog-actions">
-        <button type="button" id="cancelCompleteBtn">Cancel</button>
-        <button class="primary" type="submit">Save & complete</button>
-      </div>
-    </form>
-  </dialog>
-
-  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
