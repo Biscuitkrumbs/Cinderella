@@ -88,7 +88,7 @@ function renderTimeline(){
     const r = state.properties.findIndex(x=>x.id===p.id)+2;
     const start=diffDays(timelineStart,s.arrival); const end=diffDays(timelineStart,s.departure);
     if(end<0 || start>daysCount) return;
-    const visibleStart=Math.max(0,start); const visibleEnd=Math.min(daysCount,end); const span=Math.max(1,visibleEnd-visibleStart);
+    const visibleStart=Math.max(0,start); const visibleEnd=Math.min(daysCount,end); const span=Math.max(2,visibleEnd-visibleStart + 1);
     const stay=document.createElement('div'); stay.className='stay'; if(s.status==='complete') stay.classList.add('complete'); if(s.status==='issue') stay.classList.add('issue');
     stay.style.gridRow=r; stay.style.gridColumn=`${visibleStart+2} / span ${span}`; stay.style.color=p.colour; stay.style.background=transparent(p.colour,.14); stay.innerHTML=`<span>${s.guest}</span>`;
     stay.onclick=()=>openStay(s.id);
