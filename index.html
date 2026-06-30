@@ -7,102 +7,31 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <header class="app-header">
-    <div>
-      <h1>Good morning Cindy 👋</h1>
-      <p id="todaySummary">Loading your week...</p>
-    </div>
-    <button id="addBookingBtn" class="round-btn">+</button>
+    <button class="hamburger" aria-label="Menu">☰</button>
+    <div class="title-block"><h1>Good morning Cindy 👋</h1><p id="todaySummary">Loading your week...</p></div>
+    <button id="addBookingBtn" class="round-btn" aria-label="Add stay">+</button>
   </header>
-
   <main>
     <section class="today-card">
-      <div>
-        <p class="label">Today's progress</p>
-        <h2 id="progressText">0 of 0</h2>
-      </div>
-      <div class="progress-ring">
-        <span id="progressPercent">0%</span>
-      </div>
-      <div>
-        <p class="label">Up next</p>
-        <h3 id="upNext">Nothing yet</h3>
-      </div>
+      <div><p class="label">Today’s progress</p><h2 id="progressText">0 of 0</h2><p class="muted">complete</p></div>
+      <div class="progress-ring"><span id="progressPercent">0%</span></div>
+      <div><p class="label">Up next</p><h3 id="upNext">Nothing yet</h3><button id="startNextBtn" class="text-btn">Start clean ›</button></div>
     </section>
-
     <section class="planner-card">
-      <div class="section-header">
-        <h2>This Week</h2>
-        <div class="week-controls">
-          <button id="prevWeekBtn">‹</button>
-          <button id="todayBtn">Today</button>
-          <button id="nextWeekBtn">›</button>
-        </div>
-      </div>
-
+      <div class="section-header"><h2>This Week</h2><div class="week-controls"><button id="prevWeekBtn">‹</button><button id="todayBtn">Today</button><button id="nextWeekBtn">›</button></div></div>
+      <p id="weekLabel" class="week-label"></p>
       <div id="planner" class="planner"></div>
     </section>
-
     <section class="list-card">
-      <div class="section-header">
-        <h2>Today</h2>
-        <span id="cleanCount" class="pill">0 cleans</span>
-      </div>
+      <div class="section-header"><h2>Today</h2><span id="cleanCount" class="pill">0 cleans</span></div>
       <div id="todayList" class="today-list"></div>
     </section>
   </main>
-
-  <nav class="bottom-nav">
-    <button class="active">Planner</button>
-    <button id="feedbackBtn">Feedback</button>
-  </nav>
-
-  <dialog id="bookingDialog">
-    <form id="bookingForm" method="dialog">
-      <h2>Add Stay</h2>
-
-      <label>
-        Property nickname
-        <input id="propertyInput" required placeholder="Ocean View" />
-      </label>
-
-      <label>
-        Guest names
-        <input id="guestInput" required placeholder="Emma & Nick" />
-      </label>
-
-      <label>
-        Check in
-        <input id="checkInInput" type="date" required />
-      </label>
-
-      <label>
-        Check out
-        <input id="checkOutInput" type="date" required />
-      </label>
-
-      <div class="dialog-actions">
-        <button type="button" id="cancelBookingBtn">Cancel</button>
-        <button type="submit" class="primary">Save</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="feedbackDialog">
-    <form id="feedbackForm" method="dialog">
-      <h2>What annoyed you today?</h2>
-      <textarea id="feedbackInput" rows="5" placeholder="Type Cindy's feedback here..."></textarea>
-
-      <div class="dialog-actions">
-        <button type="button" id="cancelFeedbackBtn">Cancel</button>
-        <button type="submit" class="primary">Send</button>
-      </div>
-    </form>
-  </dialog>
-
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+  <nav class="bottom-nav"><button class="active">Planner</button><button id="feedbackBtn">Feedback</button></nav>
+  <dialog id="bookingDialog"><form id="bookingForm" method="dialog"><h2>Add Stay</h2><label>Property nickname<input id="propertyInput" required placeholder="Ocean View" /></label><label>Guest names<input id="guestInput" required placeholder="Emma & Nick" /></label><label>Check in<input id="checkInInput" type="date" required /></label><label>Check out<input id="checkOutInput" type="date" required /></label><div class="dialog-actions"><button type="button" id="cancelBookingBtn">Cancel</button><button type="submit" class="primary">Save</button></div></form></dialog>
+  <dialog id="feedbackDialog"><form id="feedbackForm" method="dialog"><h2>What annoyed you today?</h2><textarea id="feedbackInput" rows="5" placeholder="Type Cindy's feedback here..."></textarea><div class="dialog-actions"><button type="button" id="cancelFeedbackBtn">Cancel</button><button type="submit" class="primary">Send</button></div></form></dialog>
+  <script src="config.js"></script><script src="app.js"></script>
 </body>
 </html>
