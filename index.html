@@ -2,34 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Cinderella Timeline</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">Cinderella</div>
-    <div class="title">
-      <button id="backBtn" class="icon-btn">‹</button>
-      <h1 id="monthTitle">Timeline</h1>
-      <button id="forwardBtn" class="icon-btn">›</button>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">Cinderella</div>
+      <div class="month-controls">
+        <button id="prevBtn" class="icon-btn">‹</button>
+        <h1 id="monthTitle">Timeline</h1>
+        <button id="nextBtn" class="icon-btn">›</button>
+      </div>
+      <div class="actions">
+        <button id="todayBtn" class="ghost-btn">Today</button>
+        <button id="addStayBtn" class="primary-btn">+ Stay</button>
+        <button id="addPropertyBtn" class="ghost-btn">+ Property</button>
+      </div>
+    </header>
+
+    <main class="timeline-shell">
+      <div id="timeline" class="timeline" aria-label="Property booking timeline"></div>
+    </main>
+  </div>
+
+  <aside id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-card">
+      <button id="closeDrawerBtn" class="close-btn">×</button>
+      <div id="drawerContent"></div>
     </div>
-    <button id="todayBtn" class="pill-btn">Today</button>
-  </header>
+  </aside>
 
-  <main class="app-shell">
-    <aside class="property-column" id="propertyColumn"></aside>
-    <section class="timeline-wrap" id="timelineWrap">
-      <div class="timeline" id="timeline"></div>
-    </section>
-  </main>
+  <dialog id="propertyDialog">
+    <form id="propertyForm" method="dialog" class="form-card">
+      <h2 id="propertyFormTitle">Property</h2>
+      <input type="hidden" id="propertyId" />
+      <label>Property name<input id="propertyName" required placeholder="Barrier Reef Retreat" /></label>
+      <label>Colour</label>
+      <div id="colourChoices" class="colour-choices"></div>
+      <label>Address<input id="propertyAddress" placeholder="Address" /></label>
+      <label>Access / key notes<input id="propertyAccess" placeholder="Lockbox, gate code, key colour" /></label>
+      <div class="bed-grid">
+        <label>King beds<input id="kingBeds" type="number" min="0" value="0" /></label>
+        <label>Queen beds<input id="queenBeds" type="number" min="0" value="0" /></label>
+        <label>Single beds<input id="singleBeds" type="number" min="0" value="0" /></label>
+      </div>
+      <label>Notes<textarea id="propertyNotes" rows="3" placeholder="Cleaning notes, linen, owner preferences"></textarea></label>
+      <div class="dialog-actions">
+        <button type="button" id="cancelPropertyBtn">Cancel</button>
+        <button type="submit" class="primary-btn">Save Property</button>
+      </div>
+    </form>
+  </dialog>
 
-  <footer class="legend">
-    <span><i class="mini-cell"></i> 1 night</span>
-    <span><i class="clean-dot"></i> checkout / clean</span>
-    <span class="hint">Swipe left or right to scroll timeline</span>
-  </footer>
+  <dialog id="stayDialog">
+    <form id="stayForm" method="dialog" class="form-card">
+      <h2 id="stayFormTitle">Stay</h2>
+      <input type="hidden" id="stayId" />
+      <label>Property<select id="stayProperty" required></select></label>
+      <label>Guest name<input id="guestName" required placeholder="Emma & Nick" /></label>
+      <div class="date-grid">
+        <label>Arrival<input id="arrivalDate" type="date" required /></label>
+        <label>Departure<input id="departureDate" type="date" required /></label>
+      </div>
+      <label>Status<select id="stayStatus"><option value="booked">Booked</option><option value="issue">Issue</option><option value="complete">Clean complete</option></select></label>
+      <div class="dialog-actions split">
+        <button type="button" id="deleteStayBtn" class="danger-btn">Delete</button>
+        <span></span>
+        <button type="button" id="cancelStayBtn">Cancel</button>
+        <button type="submit" class="primary-btn">Save Stay</button>
+      </div>
+    </form>
+  </dialog>
 
+  <dialog id="cleanDialog">
+    <form id="cleanForm" method="dialog" class="form-card">
+      <h2>Complete Clean</h2>
+      <input type="hidden" id="cleanStayId" />
+      <p id="cleanSummary" class="muted"></p>
+      <div class="bed-grid">
+        <label>King<input id="cleanKing" type="number" min="0" /></label>
+        <label>Queen<input id="cleanQueen" type="number" min="0" /></label>
+        <label>Single<input id="cleanSingle" type="number" min="0" /></label>
+      </div>
+      <fieldset class="checks">
+        <legend>Extras</legend>
+        <label><input type="checkbox" value="BBQ cleaned" /> BBQ cleaned</label>
+        <label><input type="checkbox" value="Cot used" /> Cot used</label>
+        <label><input type="checkbox" value="High chair" /> High chair</label>
+        <label><input type="checkbox" value="Extra towels" /> Extra towels</label>
+        <label><input type="checkbox" value="Maintenance issue" /> Maintenance issue</label>
+      </fieldset>
+      <label>Invoice notes<textarea id="invoiceNotes" rows="4" placeholder="Anything extra to add to invoice later"></textarea></label>
+      <div class="dialog-actions">
+        <button type="button" id="cancelCleanBtn">Cancel</button>
+        <button type="submit" class="success-btn">Save & Complete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
