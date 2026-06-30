@@ -1,0 +1,58 @@
+const seedProperties = [
+  {id:'p1', name:'Ocean View', notes:'Gate 2468. Front door key safe.', phone:'0412 345 678'},
+  {id:'p2', name:'Riverfront', notes:'Bins Tuesday. Spare sheets in hall cupboard.', phone:''},
+  {id:'p3', name:'White House', notes:'Owner prefers text message.', phone:''},
+  {id:'p4', name:'Beachside', notes:'Check BBQ and sand outside.', phone:''},
+  {id:'p5', name:'Mountain Retreat', notes:'Long driveway.', phone:''},
+  {id:'p6', name:'Sunset Villa', notes:'Restock coffee often.', phone:''},
+  {id:'p7', name:'Lakeside', notes:'Leave towels on lower shelf.', phone:''},
+  {id:'p8', name:'Pine Cottage', notes:'Dog sometimes next door.', phone:''},
+  {id:'p9', name:'Coastal Breeze', notes:'Check windows.', phone:''},
+  {id:'p10', name:'Harbour House', notes:'Key safe at side gate.', phone:''}
+];
+const seedBookings = [
+  {id:'b1', propertyId:'p1', guest:'Emma & Nick', checkIn:'2025-05-12', checkOut:'2025-05-14', status:'open'},
+  {id:'b2', propertyId:'p1', guest:'Jake & Sarah', checkIn:'2025-05-15', checkOut:'2025-05-19', status:'open'},
+  {id:'b3', propertyId:'p2', guest:'Michael', checkIn:'2025-05-13', checkOut:'2025-05-16', status:'open'},
+  {id:'b4', propertyId:'p3', guest:'Daniel & Claire', checkIn:'2025-05-14', checkOut:'2025-05-16', status:'open'},
+  {id:'b5', propertyId:'p4', guest:'Sophie', checkIn:'2025-05-16', checkOut:'2025-05-19', status:'open'},
+  {id:'b6', propertyId:'p5', guest:'Chris & Pat', checkIn:'2025-05-13', checkOut:'2025-05-18', status:'open'},
+  {id:'b7', propertyId:'p6', guest:'Aaron & Jess', checkIn:'2025-05-13', checkOut:'2025-05-15', status:'open'},
+  {id:'b8', propertyId:'p7', guest:'Sarah', checkIn:'2025-05-14', checkOut:'2025-05-15', status:'open'},
+  {id:'b9', propertyId:'p8', guest:'Steve & Anna', checkIn:'2025-05-13', checkOut:'2025-05-15', status:'open'},
+  {id:'b10', propertyId:'p9', guest:'Liam & Zoe', checkIn:'2025-05-16', checkOut:'2025-05-19', status:'open'},
+  {id:'b11', propertyId:'p10', guest:'Alex', checkIn:'2025-05-12', checkOut:'2025-05-13', status:'open'},
+  {id:'b12', propertyId:'p10', guest:'Taylor', checkIn:'2025-05-14', checkOut:'2025-05-15', status:'open'}
+];
+let state = { properties: [], bookings: [], weekStart: startOfWeek(new Date('2025-05-12')) };
+const $ = id => document.getElementById(id);
+function ymd(d){ return d.toISOString().slice(0,10); }
+function parseDate(s){ const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function startOfWeek(d){ const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x; }
+function nights(b){ return Math.max(1, Math.round((parseDate(b.checkOut)-parseDate(b.checkIn))/86400000)); }
+function dayDiff(a,b){ return Math.round((parseDate(a)-parseDate(b))/86400000); }
+function loadLocal(){ state.properties = JSON.parse(localStorage.getItem('properties')||'null') || seedProperties; state.bookings = JSON.parse(localStorage.getItem('bookings')||'null') || seedBookings; }
+function saveLocal(){ localStorage.setItem('properties', JSON.stringify(state.properties)); localStorage.setItem('bookings', JSON.stringify(state.bookings)); }
+async function api(action, payload={}){ if(!API_URL) return null; const res = await fetch(API_URL,{method:'POST',body:JSON.stringify({action,...payload})}); return res.json(); }
+async function load(){ loadLocal(); try{ const data = await api('getData'); if(data?.properties?.length){ state.properties=data.properties; state.bookings=data.bookings; saveLocal(); } }catch(e){ console.log('Offline/local mode', e); } render(); }
+function render(){ renderHeader(); renderPropertySelect(); renderPlanner(); renderToday(); }
+function renderHeader(){ const end=addDays(state.weekStart,6); $('weekLabel').textContent = `${state.weekStart.toLocaleDateString('en-AU',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}`; }
+function renderPropertySelect(){ $('propertySelect').innerHTML = state.properties.map(p=>`<option value="${p.id}">${p.name}</option>`).join(''); }
+function renderPlanner(){ const grid=$('plannerGrid'); grid.innerHTML=''; grid.appendChild(div('cell head','')); for(let i=0;i<7;i++){ const d=addDays(state.weekStart,i); const h=div('cell head'+(ymd(d)===ymd(new Date())?' today':''), `${d.toLocaleDateString('en-AU',{weekday:'short'})}<br>${d.getDate()}<small>${loadPct(d)}%</small>`); grid.appendChild(h); }
+ state.properties.forEach((p,pi)=>{ const pc=div('cell property',`<span class="home-dot">⌂</span><span>${p.name}</span>`); grid.appendChild(pc); for(let i=0;i<7;i++){ const d=addDays(state.weekStart,i); const c=div('cell',''); const day=ymd(d); const bookings=state.bookings.filter(b=>b.propertyId===p.id && b.checkIn<=day && b.checkOut>day); bookings.forEach((b,bi)=>{ if(b.checkIn===day || day===ymd(state.weekStart)){ const start=Math.max(0, dayDiff(b.checkIn, ymd(state.weekStart))); const end=Math.min(7, dayDiff(b.checkOut, ymd(state.weekStart))); const span=Math.max(1,end-start); const card=div(`booking b${(pi+bi)%5} ${b.status==='done'?'done':''}`,`<span>${nights(b)} night${nights(b)>1?'s':''}</span><strong>${b.guest}</strong>`); card.style.width=`calc(${span*100}% + ${(span-1)*12}px)`; card.onclick=()=>showDetail(b.id); c.appendChild(card); } }); grid.appendChild(c); } }); }
+function loadPct(d){ const count=state.bookings.filter(b=>b.checkOut===ymd(d)).length; return Math.min(100,count*25); }
+function renderToday(){ const today=ymd(new Date()); const items=state.bookings.filter(b=>b.checkOut===today); const done=items.filter(b=>b.status==='done').length; $('todaySummary').textContent = items.length ? `${items.length} clean${items.length>1?'s':''} today` : 'No cleans today'; $('progressText').textContent = `${done} / ${items.length} complete`; $('progressBar').style.width = items.length ? `${done/items.length*100}%` : '0%'; $('cleanCount').textContent = `${items.length} cleans`; const list=$('todayList'); list.innerHTML = items.length ? items.map(b=>{ const p=state.properties.find(x=>x.id===b.propertyId); return `<div class="clean-item"><span class="avatar">⌂</span><div><strong>${p?.name||''}</strong><small>${b.guest} · Checkout 10:00am</small></div><button class="${b.status==='done'?'complete':'waiting'}" onclick="toggleDone('${b.id}')">${b.status==='done'?'Done':'Complete'}</button></div>`; }).join('') : '<div class="empty">No checkouts today. Nice.</div>'; }
+function div(cls,html){ const el=document.createElement('div'); el.className=cls; el.innerHTML=html; return el; }
+window.toggleDone=async id=>{ const b=state.bookings.find(x=>x.id===id); b.status=b.status==='done'?'open':'done'; saveLocal(); render(); await api('updateBooking',{booking:b}); };
+function showDetail(id){ const b=state.bookings.find(x=>x.id===id); const p=state.properties.find(x=>x.id===b.propertyId); $('detailContent').innerHTML=`<h2>${p.name}</h2><div class="detail-row"><small>Guest</small><strong>${b.guest}</strong></div><div class="detail-row"><small>Stay</small>${b.checkIn} → ${b.checkOut}</div><div class="detail-row"><small>Notes</small>${b.notes||p.notes||'No notes yet'}</div><div class="dialog-actions"><button class="danger" onclick="deleteBooking('${b.id}')">Delete</button><button onclick="document.getElementById('detailDialog').close()">Close</button></div>`; $('detailDialog').showModal(); }
+window.deleteBooking=async id=>{ state.bookings=state.bookings.filter(b=>b.id!==id); saveLocal(); render(); $('detailDialog').close(); await api('deleteBooking',{id}); };
+$('prevWeek').onclick=()=>{ state.weekStart=addDays(state.weekStart,-7); render(); };
+$('nextWeek').onclick=()=>{ state.weekStart=addDays(state.weekStart,7); render(); };
+$('todayBtn').onclick=()=>{ state.weekStart=startOfWeek(new Date()); render(); };
+$('addBookingBtn').onclick=()=>{ $('checkInInput').value=ymd(new Date()); $('checkOutInput').value=ymd(addDays(new Date(),2)); $('bookingDialog').showModal(); };
+$('bookingForm').addEventListener('submit',async e=>{ if(e.submitter?.value==='cancel') return; e.preventDefault(); const b={id:'b'+Date.now(), propertyId:$('propertySelect').value, guest:$('guestInput').value.trim(), checkIn:$('checkInInput').value, checkOut:$('checkOutInput').value, notes:$('bookingNotes').value.trim(), status:'open'}; state.bookings.push(b); saveLocal(); render(); $('bookingDialog').close(); e.target.reset(); await api('addBooking',{booking:b}); });
+$('feedbackBtn').onclick=()=> $('feedbackDialog').showModal();
+$('feedbackForm').addEventListener('submit',async e=>{ if(e.submitter?.value==='cancel') return; e.preventDefault(); const text=$('feedbackText').value.trim(); if(text){ await api('addFeedback',{text, date:new Date().toISOString()}); $('feedbackText').value=''; } $('feedbackDialog').close(); });
+$('homesBtn').onclick=()=> alert(state.properties.map(p=>`${p.name}\n${p.notes||''}`).join('\n\n'));
+load();
