@@ -1,24 +1,226 @@
-const state={currentMonday:getMonday(new Date()),bookings:[]};
-const tones=["tone-0","tone-1","tone-2","tone-3","tone-4"];
-document.addEventListener("DOMContentLoaded",init);
-function init(){bindButtons();loadBookings();}
-function bindButtons(){addBookingBtn.onclick=()=>bookingDialog.showModal();cancelBookingBtn.onclick=()=>bookingDialog.close();prevWeekBtn.onclick=()=>changeWeek(-7);nextWeekBtn.onclick=()=>changeWeek(7);todayBtn.onclick=()=>{state.currentMonday=getMonday(new Date());render();};bookingForm.onsubmit=saveBooking;feedbackBtn.onclick=()=>feedbackDialog.showModal();cancelFeedbackBtn.onclick=()=>feedbackDialog.close();feedbackForm.onsubmit=sendFeedback;startNextBtn.onclick=()=>{const n=getTodaysCleans().find(b=>b.status!=="done");if(n)alert(`Start ${n.property}\nGuest: ${n.guest}\nCheckout 10:00am`);};}
-function starterBookings(){const m=getMonday(new Date());const iso=i=>{const d=new Date(m);d.setDate(m.getDate()+i);return toISO(d)};return[{property:"Ocean View",guest:"Emma & Nick",checkIn:iso(0),checkOut:iso(2),status:"pending"},{property:"Ocean View",guest:"Jake & Sarah",checkIn:iso(3),checkOut:iso(6),status:"pending"},{property:"Riverfront",guest:"Michael",checkIn:iso(1),checkOut:iso(3),status:"pending"},{property:"Riverfront",guest:"Olivia",checkIn:iso(4),checkOut:iso(6),status:"pending"},{property:"White House",guest:"Daniel & Claire",checkIn:iso(2),checkOut:iso(3),status:"pending"},{property:"White House",guest:"Ben & Tash",checkIn:iso(5),checkOut:iso(7),status:"pending"},{property:"Beachside",guest:"Sophie",checkIn:iso(3),checkOut:iso(5),status:"pending"},{property:"Mountain Retreat",guest:"Chris & Pat",checkIn:iso(0),checkOut:iso(7),status:"pending"},{property:"Sunset Villa",guest:"Aaron & Jess",checkIn:iso(1),checkOut:iso(3),status:"pending"},{property:"Lakeside",guest:"Sarah",checkIn:iso(2),checkOut:iso(3),status:"pending"},{property:"Pine Cottage",guest:"Steve & Anna",checkIn:iso(1),checkOut:iso(2),status:"pending"},{property:"Harbour House",guest:"Alex",checkIn:iso(0),checkOut:iso(1),status:"pending"}];}
-async function loadBookings(){try{if(typeof SCRIPT_URL==="undefined"||!SCRIPT_URL)throw new Error("No script URL");const res=await fetch(`${SCRIPT_URL}?action=getBookings`);const data=await res.json();state.bookings=Array.isArray(data.bookings)&&data.bookings.length?normalise(data.bookings):starterBookings();}catch(e){state.bookings=starterBookings();}render();}
-function normalise(rows){return rows.map(r=>({property:r.property||r.Property||"Property",guest:r.guest||r.Guest||"Guest",checkIn:r.checkIn||r["Check In"]||r.check_in,checkOut:r.checkOut||r["Check Out"]||r.check_out,status:r.status||r.Status||"pending"})).filter(b=>b.checkIn&&b.checkOut);}
-async function saveBooking(e){e.preventDefault();const booking={property:propertyInput.value.trim(),guest:guestInput.value.trim(),checkIn:checkInInput.value,checkOut:checkOutInput.value,status:"pending"};if(new Date(booking.checkOut)<=new Date(booking.checkIn)){alert("Check out needs to be after check in.");return;}state.bookings.push(booking);bookingDialog.close();bookingForm.reset();render();try{await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"addBooking",booking})});}catch(e){console.log("Saved on screen only",e);}}
-async function sendFeedback(e){e.preventDefault();const text=feedbackInput.value.trim();feedbackDialog.close();feedbackForm.reset();if(!text)return;try{await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"feedback",text})});alert("Feedback sent.");}catch(e){alert("Feedback noted, but not sent to Sheets yet.");}}
-function changeWeek(days){state.currentMonday.setDate(state.currentMonday.getDate()+days);render();}
-function render(){renderPlanner();renderToday();}
-function renderPlanner(){planner.innerHTML="";const days=getWeekDays(state.currentMonday);weekLabel.textContent=`${fmtFull(days[0])} – ${fmtFull(days[6])}`;const props=[...new Set(state.bookings.map(b=>b.property))].sort();const grid=document.createElement("div");grid.className="planner-grid";grid.appendChild(cell("","heading cell"));days.forEach(d=>grid.appendChild(cell(formatDay(d),`heading cell ${sameDate(d,new Date())?"today":""}`)));props.forEach((p,pi)=>{grid.appendChild(cell(p,"property cell"));days.forEach((d,di)=>{const dc=cell("","day-cell cell");state.bookings.filter(b=>b.property===p&&sameDate(d,new Date(b.checkIn))).forEach(b=>{const bar=document.createElement("div");const len=stayLength(b);bar.className=`booking ${tones[pi%tones.length]}`;bar.style.width=`${Math.max(1,Math.min(len,8))*76-8}px`;bar.innerHTML=`<strong>${len} night${len===1?"":"s"}</strong>${b.guest}`;bar.title=`${p} - ${b.guest}`;dc.appendChild(bar);});grid.appendChild(dc);});});planner.appendChild(grid);}
-function renderToday(){const cleans=getTodaysCleans();const done=cleans.filter(b=>b.status==="done").length;todaySummary.textContent=`You have ${cleans.length} clean${cleans.length===1?"":"s"} today`;progressText.textContent=`${done} of ${cleans.length}`;progressPercent.textContent=cleans.length?`${Math.round(done/cleans.length*100)}%`:"0%";cleanCount.textContent=`${cleans.length} clean${cleans.length===1?"":"s"}`;const next=cleans.find(b=>b.status!=="done");upNext.textContent=next?next.property:"All done";todayList.innerHTML="";if(!cleans.length){todayList.innerHTML='<div class="clean-item"><div><strong>No checkouts today</strong><p>Enjoy the breathing room.</p></div></div>';return;}cleans.forEach((b,i)=>{const item=document.createElement("div");item.className="clean-item";item.innerHTML=`<div><strong>${b.property}</strong><p>${b.guest}</p><p>Checkout 10:00am</p></div><button class="primary ${b.status==="done"?"ghost":""}" data-i="${i}">${b.status==="done"?"Done":"Complete"}</button>`;item.querySelector("button").onclick=()=>completeClean(i);todayList.appendChild(item);});}
-function getTodaysCleans(){const t=toISO(new Date());return state.bookings.filter(b=>b.checkOut===t);}
-function completeClean(i){const target=getTodaysCleans()[i];if(!target)return;target.status="done";render();}
-function cell(text,cls){const d=document.createElement("div");d.className=cls;d.textContent=text;return d;}
-function getMonday(date){const d=new Date(date);const day=d.getDay();d.setDate(d.getDate()-day+(day===0?-6:1));d.setHours(0,0,0,0);return d;}
-function getWeekDays(m){return Array.from({length:7},(_,i)=>{const d=new Date(m);d.setDate(m.getDate()+i);return d;});}
-function formatDay(d){return d.toLocaleDateString("en-AU",{weekday:"short",day:"numeric"});}
-function fmtFull(d){return d.toLocaleDateString("en-AU",{day:"numeric",month:"short"});}
-function toISO(d){const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10);}
-function sameDate(a,b){return toISO(a)===toISO(b);}
-function stayLength(b){return Math.max(1,Math.round((new Date(b.checkOut)-new Date(b.checkIn))/86400000));}
+let bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+let editingIndex = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+  addBookingBtn.onclick = () => openBooking();
+  cancelBookingBtn.onclick = () => bookingDialog.close();
+  bookingForm.onsubmit = saveBooking;
+
+  feedbackBtn.onclick = () => feedbackDialog.showModal();
+  cancelFeedbackBtn.onclick = () => feedbackDialog.close();
+  feedbackForm.onsubmit = saveFeedback;
+
+  cancelIssueBtn.onclick = () => issueDialog.close();
+  issueForm.onsubmit = saveIssue;
+
+  render();
+});
+
+function openBooking(index = null) {
+  editingIndex = index;
+
+  if (index !== null) {
+    const b = bookings[index];
+    propertyInput.value = b.property;
+    guestInput.value = b.guest;
+    checkInInput.value = b.checkIn;
+    checkOutInput.value = b.checkOut;
+  } else {
+    bookingForm.reset();
+  }
+
+  bookingDialog.showModal();
+}
+
+function saveBooking(e) {
+  e.preventDefault();
+
+  const booking = {
+    property: propertyInput.value.trim(),
+    guest: guestInput.value.trim(),
+    checkIn: checkInInput.value,
+    checkOut: checkOutInput.value,
+    status: "pending"
+  };
+
+  if (editingIndex !== null) {
+    bookings[editingIndex] = booking;
+  } else {
+    bookings.push(booking);
+  }
+
+  saveLocal();
+  bookingDialog.close();
+  render();
+  sendToSheet("saveBooking", booking);
+}
+
+function deleteBooking(index) {
+  if (!confirm("Delete this stay?")) return;
+  bookings.splice(index, 1);
+  saveLocal();
+  render();
+}
+
+function openIssue(index) {
+  issueBookingIndex.value = index;
+  issueForm.reset();
+  issueDialog.showModal();
+}
+
+function saveIssue(e) {
+  e.preventDefault();
+
+  const b = bookings[issueBookingIndex.value];
+
+  const issue = {
+    date: new Date().toISOString(),
+    property: b.property,
+    guest: b.guest,
+    type: issueTypeInput.value,
+    notes: issueNotesInput.value.trim(),
+    status: "open"
+  };
+
+  issueDialog.close();
+  sendToSheet("saveIssue", issue);
+  alert("Issue saved");
+}
+
+function saveFeedback(e) {
+  e.preventDefault();
+
+  const feedback = {
+    date: new Date().toISOString(),
+    comment: feedbackInput.value.trim()
+  };
+
+  feedbackDialog.close();
+  feedbackForm.reset();
+  sendToSheet("saveFeedback", feedback);
+}
+
+function saveLocal() {
+  localStorage.setItem("bookings", JSON.stringify(bookings));
+}
+
+function render() {
+  renderPlanner();
+  renderToday();
+}
+
+function renderPlanner() {
+  planner.innerHTML = "";
+
+  const days = getWeek();
+  const properties = [...new Set(bookings.map(b => b.property))];
+
+  const grid = document.createElement("div");
+  grid.className = "planner-grid";
+
+  grid.appendChild(cell(""));
+  days.forEach(d => grid.appendChild(cell(formatDay(d), "heading")));
+
+  properties.forEach(property => {
+    grid.appendChild(cell(property, "property"));
+
+    days.forEach(day => {
+      const dayCell = cell("", "day-cell");
+
+      bookings.forEach((b, index) => {
+        if (b.property !== property) return;
+        if (!isStartDay(day, b.checkIn)) return;
+
+        const nights = stayLength(b);
+        const bar = document.createElement("div");
+        bar.className = "booking";
+        bar.style.width = `${nights * 96}px`;
+        bar.innerHTML = `<strong>${b.guest}</strong>`;
+        bar.onclick = () => openBooking(index);
+        bar.oncontextmenu = e => {
+          e.preventDefault();
+          openIssue(index);
+        };
+
+        dayCell.appendChild(bar);
+      });
+
+      grid.appendChild(dayCell);
+    });
+  });
+
+  planner.appendChild(grid);
+}
+
+function renderToday() {
+  const today = iso(new Date());
+  const todays = bookings.filter(b => b.checkOut === today);
+
+  todaySummary.textContent = `${todays.length} cleans today`;
+  cleanCount.textContent = `${todays.length} cleans`;
+  progressText.textContent = `0 of ${todays.length}`;
+  progressPercent.textContent = "0%";
+  upNext.textContent = todays[0]?.property || "All done";
+
+  todayList.innerHTML = "";
+
+  todays.forEach(b => {
+    const index = bookings.indexOf(b);
+    const div = document.createElement("div");
+    div.className = "clean-item";
+    div.innerHTML = `
+      <strong>${b.property}</strong>
+      <p>${b.guest}</p>
+      <p>Checkout 10:00am</p>
+      <button class="primary" onclick="openIssue(${index})">Report issue</button>
+      <button onclick="openBooking(${index})">Edit</button>
+      <button onclick="deleteBooking(${index})">Delete</button>
+    `;
+    todayList.appendChild(div);
+  });
+}
+
+async function sendToSheet(action, data) {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action, data })
+    });
+  } catch {
+    console.log("Saved locally only", action, data);
+  }
+}
+
+function getWeek() {
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
+}
+
+function cell(text, cls = "") {
+  const div = document.createElement("div");
+  div.className = cls;
+  div.textContent = text;
+  return div;
+}
+
+function formatDay(d) {
+  return d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric" });
+}
+
+function iso(d) {
+  return d.toISOString().slice(0, 10);
+}
+
+function isStartDay(day, checkIn) {
+  return iso(day) === checkIn;
+}
+
+function stayLength(b) {
+  return Math.max(1, Math.round((new Date(b.checkOut) - new Date(b.checkIn)) / 86400000));
+}
