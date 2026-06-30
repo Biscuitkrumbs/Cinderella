@@ -32,6 +32,36 @@
   <nav class="bottom-nav"><button class="active">Planner</button><button id="feedbackBtn">Feedback</button></nav>
   <dialog id="bookingDialog"><form id="bookingForm" method="dialog"><h2>Add Stay</h2><label>Property nickname<input id="propertyInput" required placeholder="Ocean View" /></label><label>Guest names<input id="guestInput" required placeholder="Emma & Nick" /></label><label>Check in<input id="checkInInput" type="date" required /></label><label>Check out<input id="checkOutInput" type="date" required /></label><div class="dialog-actions"><button type="button" id="cancelBookingBtn">Cancel</button><button type="submit" class="primary">Save</button></div></form></dialog>
   <dialog id="feedbackDialog"><form id="feedbackForm" method="dialog"><h2>What annoyed you today?</h2><textarea id="feedbackInput" rows="5" placeholder="Type Cindy's feedback here..."></textarea><div class="dialog-actions"><button type="button" id="cancelFeedbackBtn">Cancel</button><button type="submit" class="primary">Send</button></div></form></dialog>
+  <dialog id="issueDialog">
+  <form id="issueForm" method="dialog">
+    <h2>Report Issue</h2>
+
+    <input id="issueBookingIndex" type="hidden" />
+
+    <label>
+      Issue type
+      <select id="issueTypeInput" required>
+        <option value="">Choose one</option>
+        <option>Missing supplies</option>
+        <option>Damage</option>
+        <option>Access / key problem</option>
+        <option>Extra messy</option>
+        <option>Linen / laundry</option>
+        <option>Other</option>
+      </select>
+    </label>
+
+    <label>
+      Notes
+      <textarea id="issueNotesInput" rows="4" placeholder="What happened?"></textarea>
+    </label>
+
+    <div class="dialog-actions">
+      <button type="button" id="cancelIssueBtn">Cancel</button>
+      <button type="submit" class="primary">Save issue</button>
+    </div>
+  </form>
+</dialog>
   <script src="config.js"></script><script src="app.js"></script>
 </body>
 </html>
