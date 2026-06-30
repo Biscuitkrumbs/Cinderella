@@ -2,69 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Cinderella V3</title>
-  <link rel="manifest" href="manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cinderella Timeline</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <aside class="side-nav">
-      <div class="brand">Cinderella</div>
-      <button class="nav active">Timeline</button>
-      <button class="nav" id="showTodayBtn">Today</button>
-      <button class="nav" id="showPropertiesBtn">Properties</button>
-    </aside>
+  <header class="topbar">
+    <div class="brand">Cinderella</div>
+    <div class="top-actions">
+      <button id="todayBtn">Today</button>
+      <button id="addPropertyBtn">+ Property</button>
+      <button id="addStayBtn" class="primary">+ Stay</button>
+    </div>
+  </header>
 
-    <main class="main">
-      <header class="topbar">
-        <button id="prevBtn" class="icon-btn">‹</button>
+  <main class="app">
+    <section class="timeline-card">
+      <div class="timeline-head">
+        <button id="backBtn">‹</button>
         <h1 id="monthTitle">Timeline</h1>
-        <button id="nextBtn" class="icon-btn">›</button>
-        <button id="todayBtn" class="today-btn">Today</button>
-        <button id="addPropertyBtn" class="secondary-btn">+ Property</button>
-        <button id="addBookingBtn" class="primary-btn">+ Stay</button>
-      </header>
-
-      <section class="timeline-wrap">
-        <div id="timeline" class="timeline"></div>
-      </section>
-
-      <section class="legend">
-        <span><i class="legend-cell"></i> one day / one night line</span>
-        <span><i class="legend-dot clean"></i> checkout / clean</span>
-        <span>Tap a property to edit it. Tap a stay to edit / complete.</span>
-      </section>
-    </main>
-  </div>
+        <button id="forwardBtn">›</button>
+      </div>
+      <p class="hint">One line = one night. Property colours stay the same as the key rings.</p>
+      <div id="timeline" class="timeline"></div>
+    </section>
+  </main>
 
   <dialog id="propertyDialog">
     <form id="propertyForm" method="dialog">
       <h2 id="propertyDialogTitle">Add Property</h2>
       <input id="propertyId" type="hidden" />
-      <label>Property name<input id="propertyName" required placeholder="Barrier Reef Retreat" /></label>
-      <label>Default clean time<input id="propertyHours" type="number" step="0.25" min="0" value="2.5" /></label>
-      <label>Address<input id="propertyAddress" placeholder="Optional" /></label>
-      <label>Access / key notes<textarea id="propertyAccess" rows="3" placeholder="Lockbox, parking, keyring notes..."></textarea></label>
+      <label>Property name<input id="propertyName" required /></label>
       <label>Colour</label>
       <div id="colourChoices" class="colour-choices"></div>
-      <div class="dialog-actions"><button type="button" id="cancelPropertyBtn">Cancel</button><button class="primary-btn">Save Property</button></div>
+      <label>Address<input id="propertyAddress" /></label>
+      <label>Access / key notes<textarea id="propertyNotes" rows="3"></textarea></label>
+      <div class="dialog-actions">
+        <button type="button" id="cancelPropertyBtn">Cancel</button>
+        <button class="primary" type="submit">Save</button>
+      </div>
     </form>
   </dialog>
 
-  <dialog id="bookingDialog">
-    <form id="bookingForm" method="dialog">
-      <h2 id="bookingDialogTitle">Add Stay</h2>
-      <input id="bookingId" type="hidden" />
-      <label>Property<select id="bookingProperty" required></select></label>
-      <label>Guest names<input id="bookingGuest" required placeholder="Emma & Nick" /></label>
-      <label>Check in<input id="bookingCheckIn" type="date" required /></label>
-      <label>Check out<input id="bookingCheckOut" type="date" required /></label>
+  <dialog id="stayDialog">
+    <form id="stayForm" method="dialog">
+      <h2 id="stayDialogTitle">Add Stay</h2>
+      <input id="stayId" type="hidden" />
+      <label>Property<select id="stayProperty" required></select></label>
+      <label>Guest names<input id="stayGuest" required /></label>
+      <label>Check in<input id="stayCheckIn" type="date" required /></label>
+      <label>Check out<input id="stayCheckOut" type="date" required /></label>
       <div class="dialog-actions split">
-        <button type="button" id="deleteBookingBtn" class="danger-btn">Delete</button>
+        <button type="button" id="deleteStayBtn" class="danger">Delete</button>
         <span></span>
-        <button type="button" id="cancelBookingBtn">Cancel</button>
-        <button class="primary-btn">Save Stay</button>
+        <button type="button" id="cancelStayBtn">Cancel</button>
+        <button class="primary" type="submit">Save</button>
       </div>
     </form>
   </dialog>
@@ -72,31 +64,18 @@
   <dialog id="completeDialog">
     <form id="completeForm" method="dialog">
       <h2>Complete Clean</h2>
-      <p id="completeSub" class="muted"></p>
+      <input id="completeStayId" type="hidden" />
       <div class="bed-grid">
-        <label>King<div class="counter"><button type="button" data-bed="king" data-step="-1">−</button><input id="bedKing" type="number" min="0" value="0"><button type="button" data-bed="king" data-step="1">+</button></div></label>
-        <label>Queen<div class="counter"><button type="button" data-bed="queen" data-step="-1">−</button><input id="bedQueen" type="number" min="0" value="0"><button type="button" data-bed="queen" data-step="1">+</button></div></label>
-        <label>Single<div class="counter"><button type="button" data-bed="single" data-step="-1">−</button><input id="bedSingle" type="number" min="0" value="0"><button type="button" data-bed="single" data-step="1">+</button></div></label>
+        <label>King<input id="bedsKing" type="number" min="0" value="0" /></label>
+        <label>Queen<input id="bedsQueen" type="number" min="0" value="0" /></label>
+        <label>Single<input id="bedsSingle" type="number" min="0" value="0" /></label>
       </div>
-      <label>Invoice notes<textarea id="completeNotes" rows="4" placeholder="Anything extra to include later on invoice..."></textarea></label>
-      <div class="dialog-actions"><button type="button" id="cancelCompleteBtn">Cancel</button><button class="success-btn">Save & Complete</button></div>
+      <label>Invoice notes<textarea id="completeNotes" rows="4" placeholder="Anything extra for invoice later"></textarea></label>
+      <div class="dialog-actions">
+        <button type="button" id="cancelCompleteBtn">Cancel</button>
+        <button class="primary" type="submit">Save & complete</button>
+      </div>
     </form>
-  </dialog>
-
-  <dialog id="detailDialog">
-    <div class="detail-panel">
-      <button id="closeDetailBtn" class="close">×</button>
-      <h2 id="detailTitle"></h2>
-      <p id="detailProperty" class="muted"></p>
-      <dl>
-        <dt>Check in</dt><dd id="detailCheckIn"></dd>
-        <dt>Check out</dt><dd id="detailCheckOut"></dd>
-        <dt>Nights</dt><dd id="detailNights"></dd>
-      </dl>
-      <button id="editStayBtn" class="outline-btn">Edit Booking</button>
-      <button id="completeStayBtn" class="success-btn">Complete Clean</button>
-      <button id="issueStayBtn" class="warn-btn">Report Issue</button>
-    </div>
   </dialog>
 
   <script src="config.js"></script>
