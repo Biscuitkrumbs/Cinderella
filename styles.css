@@ -216,7 +216,7 @@ textarea {
 .prop-cell {
   position: sticky;
   left: 0;
-  z-index: 35;
+  z-index: 100;
 
   display: flex;
   align-items: center;
@@ -232,6 +232,15 @@ textarea {
 
   cursor: pointer;
   overflow: hidden;
+  background: white;
+}
+
+.prop-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  z-index: -1;
 }
 
 /* solid mask layer so the grid is NOT visible under the property name */
