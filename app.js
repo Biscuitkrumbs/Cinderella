@@ -90,8 +90,15 @@ function renderTimeline(){
     if(end<0 || start>daysCount) return;
     const visibleStart=Math.max(0,start); const visibleEnd=Math.min(daysCount,end); const span=Math.max(2,visibleEnd-visibleStart + 1);
     const stay=document.createElement('div'); stay.className='stay'; if(s.status==='complete') stay.classList.add('complete'); if(s.status==='issue') stay.classList.add('issue');
-    stay.style.gridRow=r; stay.style.gridColumn=`${visibleStart+2} / span ${span}`; stay.style.color=p.colour; stay.style.background=transparent(p.colour,.14); stay.innerHTML=`<span>${s.guest}</span>`;
-    stay.onclick=()=>openStay(s.id);
+    stay.style.gridRow = r;
+    stay.style.gridColumn = `${visibleStart + 2} / span ${span}`;
+    stay.style.transform = "none";
+    stay.style.width = "auto";
+    stay.style.color = p.colour;
+    stay.style.background = transparent(p.colour, .20);
+    stay.innerHTML = `<span>${s.guest}</span>`;
+    stay.onclick = () => openStay(s.id);
+
     grid.appendChild(stay);
     const dot=document.createElement('div'); dot.className='clean-dot'; dot.title='Complete clean'; dot.style.gridRow=r; dot.style.gridColumn=Math.min(daysCount,Math.max(1,end))+1; dot.onclick=()=>openClean(s.id); grid.appendChild(dot);
   });

@@ -27,7 +27,8 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 button,
@@ -216,7 +217,7 @@ textarea {
 .prop-cell {
   position: sticky;
   left: 0;
-  z-index: 100;
+  z-index: 200;
 
   display: flex;
   align-items: center;
@@ -232,32 +233,18 @@ textarea {
 
   cursor: pointer;
   overflow: hidden;
-  background: white;
+ background: var(--prop-bg, #fff);
+ isolation: isolate;
 }
 
-.prop-cell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  z-index: -1;
-}
 
-/* solid mask layer so the grid is NOT visible under the property name */
-.prop-cell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  z-index: -1;
-}
 
 .prop-dot {
   width: 14px;
   height: 14px;
   border-radius: 999px;
   flex: 0 0 auto;
-  box-shadow: 0 0 0 3px rgba(255,255,255,.65);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.65);
 }
 
 /* =========================
@@ -283,8 +270,8 @@ textarea {
     arrival starts in the afternoon,
     departure ends in the morning.
   */
-  margin-left: calc(var(--cell) / 2);
-  margin-right: calc(var(--cell) / 2);
+  
+  
 
   border: 2px solid currentColor;
   border-radius: 999px;
@@ -306,7 +293,7 @@ textarea {
   box-shadow: 0 8px 18px rgba(16, 19, 34, 0.08);
 
   cursor: pointer;
-  z-index: 10;
+  z-index: 5;
 }
 
 .stay.complete {
@@ -314,7 +301,7 @@ textarea {
 }
 
 .stay.issue {
-  box-shadow: 0 0 0 3px rgba(255, 130, 0, .18);
+  box-shadow: 0 0 0 3px rgba(255, 130, 0, 0.18);
 }
 
 /* =========================
@@ -331,7 +318,7 @@ textarea {
 
   background: #59e03f;
   border: 3px solid #2aa824;
-  box-shadow: 0 0 0 4px rgba(89, 224, 63, .14);
+  box-shadow: 0 0 0 4px rgba(89, 224, 63, 0.14);
 
   z-index: 15;
   cursor: pointer;
@@ -346,7 +333,7 @@ textarea {
   top: var(--header);
   bottom: 0;
   width: 2px;
-  background: rgba(116, 87, 232, .35);
+  background: rgba(116, 87, 232, 0.35);
   z-index: 12;
   pointer-events: none;
 }
@@ -360,11 +347,11 @@ dialog {
   border: 0;
   border-radius: 22px;
   padding: 0;
-  box-shadow: 0 24px 70px rgba(16, 19, 34, .28);
+  box-shadow: 0 24px 70px rgba(16, 19, 34, 0.28);
 }
 
 dialog::backdrop {
-  background: rgba(16, 19, 34, .45);
+  background: rgba(16, 19, 34, 0.45);
 }
 
 .form-card {
@@ -470,7 +457,7 @@ textarea {
   inset: 0;
   display: none;
   justify-content: flex-end;
-  background: rgba(16, 19, 34, .25);
+  background: rgba(16, 19, 34, 0.25);
   z-index: 80;
 }
 
@@ -483,7 +470,7 @@ textarea {
   height: 100%;
   background: white;
   padding: 24px;
-  box-shadow: -20px 0 60px rgba(16, 19, 34, .22);
+  box-shadow: -20px 0 60px rgba(16, 19, 34, 0.22);
   position: relative;
 }
 
