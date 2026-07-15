@@ -7,7 +7,7 @@
 const CHECK_IN_HOUR = 18;
 const CHECK_OUT_HOUR = 6;
 const DAYS_TO_SHOW = 60;
-const DAYS_BEFORE_TODAY = 3;
+const DAYS_BEFORE_TODAY = 5;
 
 const DESKTOP_DAY_WIDTH = 48;
 const MOBILE_DAY_WIDTH = 38;
