@@ -7,9 +7,25 @@
 const CHECK_IN_HOUR = 18;
 const CHECK_OUT_HOUR = 6;
 const DAYS_TO_SHOW = 60;
-const DAY_WIDTH = 48;
-const PROPERTY_COLUMN_WIDTH = 180;
 const DAYS_BEFORE_TODAY = 3;
+
+const DESKTOP_DAY_WIDTH = 48;
+const MOBILE_DAY_WIDTH = 44;
+
+const DESKTOP_PROPERTY_COLUMN_WIDTH = 180;
+const MOBILE_PROPERTY_COLUMN_WIDTH = 110;
+
+
+function getTimelineDimensions() {
+  const isMobile = window.matchMedia("(max-width: 720px)").matches;
+
+  return {
+    dayWidth: isMobile ? MOBILE_DAY_WIDTH : DESKTOP_DAY_WIDTH,
+    propertyColumnWidth: isMobile
+      ? MOBILE_PROPERTY_COLUMN_WIDTH
+      : DESKTOP_PROPERTY_COLUMN_WIDTH
+  };
+}
 
 // ======================================================
 // MAIN TIMELINE RENDERER
@@ -19,6 +35,7 @@ function renderTimelineCalendar() {
   const calendar = document.getElementById("timelineCalendar");
   if (!calendar) return;
 
+  const { dayWidth, propertyColumnWidth } = getTimelineDimensions();
   const startDate = addDays(new Date(), -DAYS_BEFORE_TODAY);
   const days = createTimelineDays(startDate, DAYS_TO_SHOW);
   const activeProperties = state.properties.filter(property => !property.archived);
@@ -31,11 +48,11 @@ function renderTimelineCalendar() {
   calendar.innerHTML = `
     <div
       class="timeline-grid"
-      style="grid-template-columns: ${PROPERTY_COLUMN_WIDTH}px repeat(${DAYS_TO_SHOW}, ${DAY_WIDTH}px);"
+      style="grid-template-columns: ${propertyColumnWidth}px repeat(${DAYS_TO_SHOW}, ${dayWidth}px);"
     >
       ${renderTimelineMonths(days)}
       ${renderTimelineDays(days)}
-      ${renderTimelineBody(activeProperties, days, startDate)}
+      ${renderTimelineBody(activeProperties, days, startDate, dayWidth)}
     </div>
   `;
 }
@@ -103,15 +120,17 @@ function renderTimelineDays(days) {
   `;
 }
 
-function renderTimelineBody(properties, days, startDate) {
-  return properties.map(property => renderPropertyRow(property, days, startDate)).join("");
+function renderTimelineBody(properties, days, startDate, dayWidth) {
+  return properties
+    .map(property => renderPropertyRow(property, days, startDate, dayWidth))
+    .join("");
 }
 
 // ======================================================
 // PROPERTY ROW RENDERING
 // ======================================================
 
-function renderPropertyRow(property, days, startDate) {
+function renderPropertyRow(property, days, startDate, dayWidth) {
   const propertyStays = state.stays.filter(stay =>
     !stay.archived && stay.propertyId === property.id
   );
@@ -121,12 +140,20 @@ function renderPropertyRow(property, days, startDate) {
       ${escapeHtml(property.name)}
     </div>
 
-    <div class="timeline-row-track" style="grid-column: span ${DAYS_TO_SHOW};">
+    <div
+      class="timeline-row-track"
+      style="
+        grid-column: span ${DAYS_TO_SHOW};
+        grid-template-columns: repeat(${DAYS_TO_SHOW}, ${dayWidth}px);
+      "
+    >
       ${days.map(day => `
         <div class="timeline-cell ${day.isToday ? "today-column" : ""}"></div>
       `).join("")}
 
-      ${propertyStays.map(stay => renderStay(stay, property, startDate)).join("")}
+      ${propertyStays
+        .map(stay => renderStay(stay, property, startDate, dayWidth))
+        .join("")}
     </div>
   `;
 }
@@ -135,7 +162,7 @@ function renderPropertyRow(property, days, startDate) {
 // STAY RENDERING
 // ======================================================
 
-function renderStay(stay, property, startDate) {
+function renderStay(stay, property, startDate, dayWidth) {
   const clean = getCleanForStay(stay.id);
 
   const startOffset = daysBetween(toDateKey(startDate), stay.arrivalDate);
@@ -143,8 +170,11 @@ function renderStay(stay, property, startDate) {
 
   if (endOffset < 0 || startOffset >= DAYS_TO_SHOW) return "";
 
-  const startPx = (startOffset * DAY_WIDTH) + hourOffset(CHECK_IN_HOUR, DAY_WIDTH);
-  const endPx = (endOffset * DAY_WIDTH) + hourOffset(CHECK_OUT_HOUR, DAY_WIDTH);
+  const startPx =
+    startOffset * dayWidth + hourOffset(CHECK_IN_HOUR, dayWidth);
+
+  const endPx =
+    endOffset * dayWidth + hourOffset(CHECK_OUT_HOUR, dayWidth);
   const widthPx = endPx - startPx;
 
   if (widthPx <= 0) return "";
