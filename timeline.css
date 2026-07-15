@@ -226,3 +226,15 @@
     font-size: 11px;
   }
 }
+@media (max-width: 720px) {
+  .timeline-property,
+  .timeline-corner,
+  .timeline-month-corner {
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+  }
+}
