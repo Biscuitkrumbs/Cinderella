@@ -1,6 +1,12 @@
 #timelineCalendar {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
 }
 
 .timeline-grid {
@@ -60,7 +66,7 @@
 
 .today-column { background: var(--today); }
 
-.timeline-property,
+.timeline-property
 .timeline-cell {
   border-right: 1px solid var(--grid);
   border-bottom: 1px solid var(--grid);
@@ -75,6 +81,9 @@
   font-weight: 800;
   color: white;
   border-right: 2px solid var(--grid);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; 
 }
 
 .timeline-row-track {
@@ -141,3 +150,63 @@
 }
 
 .timeline-empty { padding: 16px; }
+@media (max-width: 720px) {
+  #timelineCalendar {
+    margin-inline: -8px;
+    width: calc(100% + 16px);
+    max-width: none;
+    padding-inline: 8px;
+  }
+
+  .timeline-property {
+    width: 110px;
+    min-width: 110px;
+    padding: 12px 7px;
+    font-size: 12px;
+  }
+
+  .timeline-day-header {
+    height: 48px;
+    font-size: 11px;
+  }
+
+  .timeline-row-track,
+  .timeline-cell,
+  .timeline-property {
+    min-height: 52px;
+  }
+
+  .timeline-booking-bar {
+    top: 10px;
+    height: 30px;
+    font-size: 12px;
+    padding: 7px 24px 0 9px;
+  }
+
+  .clean-dot {
+    top: 35px;
+    width: 22px;
+    height: 22px;
+  }
+}
+@media (max-width: 720px) {
+  #timelineCalendar {
+    margin: 0;
+    width: 100%;
+    padding: 0 0 10px;
+  }
+
+  .timeline-grid {
+    border-left: 0;
+  }
+
+  .timeline-property {
+    padding: 10px 7px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .timeline-booking-bar {
+    font-size: 11px;
+  }
+}

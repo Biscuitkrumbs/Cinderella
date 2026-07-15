@@ -308,9 +308,19 @@ dialog::backdrop { background: rgba(0,0,0,0.30); }
 }
 
 @media (max-width: 720px) {
-    .app-header {
-    flex-direction: row;
+  body {
+    padding: 10px;
+  }
+
+  .app-header {
+    margin-bottom: 10px;
     align-items: center;
+  }
+
+  .app-title h1 {
+    font-size: 2rem;
+    line-height: 1;
+    margin-bottom: 0;
   }
 
   .app-title p {
@@ -318,15 +328,37 @@ dialog::backdrop { background: rgba(0,0,0,0.30); }
   }
 
   .header-actions {
-    flex-shrink: 0;
+    gap: 8px;
   }
 
   .header-actions button {
-    padding: 10px 12px;
+    padding: 9px 12px;
+    min-height: 42px;
   }
-  body { padding: 12px; }
-  .app-header, .section-heading, .item { align-items: stretch; flex-direction: column; }
-  .two-column, .bed-grid, .summary-grid { grid-template-columns: 1fr; }
-  .actions { justify-content: stretch; }
-  .actions button { flex: 1; }
+
+  main {
+    gap: 10px;
+  }
+
+  .timeline-section {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .timeline-section .section-heading {
+    padding: 8px 2px 6px;
+    margin-bottom: 0;
+  }
+
+  .timeline-section .section-heading h2 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
+
+  .timeline-section .section-heading p {
+    display: none;
+  }
 }
