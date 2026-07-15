@@ -17,17 +17,23 @@
   </div>
 
   <header class="app-header">
-    <div>
+    <div class="app-title">
       <h1>Cinderella</h1>
       <p>Holiday rental cleaning planner</p>
     </div>
 
-    <nav class="top-nav" aria-label="Main navigation">
-      <a href="#timelineSection">Timeline</a>
-      <a href="#propertiesSection">Properties</a>
-      <a href="#staysSection">Stays</a>
-      <a href="#cleansSection">Cleans</a>
-    </nav>
+    <div class="header-actions">
+      <button id="newStayBtn" type="button">Add Stay</button>
+
+      <button
+        id="menuToggleBtn"
+        type="button"
+        aria-expanded="false"
+        aria-controls="adminMenu"
+      >
+        Menu
+      </button>
+    </div>
   </header>
 
   <main>
@@ -37,10 +43,10 @@
           <h2>Timeline</h2>
           <p>Green dots need cleaning. Blue ticks are completed.</p>
         </div>
-        <button id="newStayBtn" type="button">Add Stay</button>
       </div>
       <div id="timelineCalendar"></div>
     </section>
+    <div id="adminMenu" class="admin-menu hidden"></div>
 
     <section id="todaySection" class="section-card">
       <h2>Cleaning Summary</h2>
@@ -74,6 +80,7 @@
         <button id="clearDemoBtn" type="button">Clear Demo Data</button>
       </div>
     </section>
+    </div>
   </main>
 
   <dialog id="propertyDialog">

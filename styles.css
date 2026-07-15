@@ -284,7 +284,46 @@ dialog::backdrop { background: rgba(0,0,0,0.30); }
   100% { transform: scale(1); opacity: 1; }
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-menu {
+  display: grid;
+  gap: 20px;
+}
+
+.admin-menu.hidden {
+  display: none;
+}
+
+#menuToggleBtn {
+  background: var(--surface);
+}
+
+.timeline-section {
+  overflow: hidden;
+}
+
 @media (max-width: 720px) {
+    .app-header {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .app-title p {
+    display: none;
+  }
+
+  .header-actions {
+    flex-shrink: 0;
+  }
+
+  .header-actions button {
+    padding: 10px 12px;
+  }
   body { padding: 12px; }
   .app-header, .section-heading, .item { align-items: stretch; flex-direction: column; }
   .two-column, .bed-grid, .summary-grid { grid-template-columns: 1fr; }

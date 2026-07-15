@@ -24,6 +24,9 @@ const cleanForm = document.getElementById("cleanForm");
 const cancelCleanBtn = document.getElementById("cancelCleanBtn");
 const resetCleanBtn = document.getElementById("resetCleanBtn");
 
+const menuToggleBtn = document.getElementById("menuToggleBtn");
+const adminMenu = document.getElementById("adminMenu");
+
 let state = {
   properties: [],
   stays: [],
@@ -46,6 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function bindButtons() {
+  if (menuToggleBtn && adminMenu) {
+  menuToggleBtn.addEventListener("click", () => {
+    const isHidden = adminMenu.classList.toggle("hidden");
+
+    menuToggleBtn.textContent = isHidden ? "Menu" : "Close Menu";
+    menuToggleBtn.setAttribute("aria-expanded", String(!isHidden));
+  });
+}
   if (newPropertyBtn) newPropertyBtn.addEventListener("click", openNewProperty);
   if (cancelPropertyBtn) cancelPropertyBtn.addEventListener("click", () => propertyDialog.close());
 
