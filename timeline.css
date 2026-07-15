@@ -148,7 +148,23 @@
   top: 50%;
   transform: translate(-50%, -50%);
 }
+.timeline-cell {
+  min-height: 56px;
+  background: var(--surface);
+  border-right: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+}
 
+.timeline-row-track {
+  position: relative;
+  display: grid;
+}
+
+@media (max-width: 720px) {
+  .timeline-cell {
+    min-height: 52px;
+  }
+}
 .timeline-empty { padding: 16px; }
 @media (max-width: 720px) {
   #timelineCalendar {
