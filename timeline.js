@@ -13,7 +13,7 @@ const DESKTOP_DAY_WIDTH = 48;
 const MOBILE_DAY_WIDTH = 38;
 
 const DESKTOP_PROPERTY_COLUMN_WIDTH = 180;
-const MOBILE_PROPERTY_COLUMN_WIDTH = 76;
+const MOBILE_PROPERTY_COLUMN_WIDTH = 50;
 
 
 function getTimelineDimensions() {
