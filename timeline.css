@@ -64,9 +64,11 @@
   border-bottom: 1px solid var(--grid);
 }
 
-.today-column { background: var(--today); }
+.today-column {
+  background: var(--today);
+}
 
-.timeline-property
+.timeline-property,
 .timeline-cell {
   border-right: 1px solid var(--grid);
   border-bottom: 1px solid var(--grid);
@@ -83,7 +85,7 @@
   border-right: 2px solid var(--grid);
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap; 
+  white-space: nowrap;
 }
 
 .timeline-row-track {
@@ -160,25 +162,26 @@
   display: grid;
 }
 
-@media (max-width: 720px) {
-  .timeline-cell {
-    min-height: 52px;
-  }
-}
+
 .timeline-empty { padding: 16px; }
+
 @media (max-width: 720px) {
   #timelineCalendar {
-    margin-inline: -8px;
-    width: calc(100% + 16px);
+    margin: 0;
+    width: 100%;
     max-width: none;
-    padding-inline: 8px;
+    padding: 0 0 10px;
+  }
+
+  .timeline-grid {
+    border-left: 0;
   }
 
   .timeline-property {
-    width: 110px;
-    min-width: 110px;
-    padding: 12px 7px;
+    min-width: 0;
+    padding: 10px 7px;
     font-size: 12px;
+    line-height: 1.2;
   }
 
   .timeline-day-header {
@@ -195,7 +198,7 @@
   .timeline-booking-bar {
     top: 10px;
     height: 30px;
-    font-size: 12px;
+    font-size: 11px;
     padding: 7px 24px 0 9px;
   }
 
@@ -205,25 +208,3 @@
     height: 22px;
   }
 }
-@media (max-width: 720px) {
-  #timelineCalendar {
-    margin: 0;
-    width: 100%;
-    padding: 0 0 10px;
-  }
-
-  .timeline-grid {
-    border-left: 0;
-  }
-
-  .timeline-property {
-    padding: 10px 7px;
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
-  .timeline-booking-bar {
-    font-size: 11px;
-  }
-}
-
