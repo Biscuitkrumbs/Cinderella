@@ -4,8 +4,9 @@
 // This file displays data. app.js owns editing and saving.
 // ======================================================
 
-const CHECK_IN_HOUR = 18;
-const CHECK_OUT_HOUR = 6;
+const CHECK_IN_HOUR = 14;
+const CHECK_OUT_HOUR = 10;
+const CLEAN_DOT_HOUR = 12;
 const DAYS_TO_SHOW = 60;
 const DAYS_BEFORE_TODAY = 5;
 
@@ -177,6 +178,9 @@ function renderStay(stay, property, startDate, dayWidth) {
     endOffset * dayWidth + hourOffset(CHECK_OUT_HOUR, dayWidth);
   const widthPx = endPx - startPx;
 
+  const cleanDotPx =
+  endOffset * dayWidth + hourOffset(CLEAN_DOT_HOUR, dayWidth);
+
   if (widthPx <= 0) return "";
 
   const cleanClass = clean && clean.status === "Completed" ? "clean-complete" : "clean-pending";
@@ -197,7 +201,9 @@ function renderStay(stay, property, startDate, dayWidth) {
         type="button"
         class="clean-dot ${cleanClass}"
         onclick="event.stopPropagation(); handleCleanDotClick('${clean ? clean.id : ""}')"
-        style="left: ${endPx - 12}px;"
+        style="left: ${cleanDotPx - 24
+
+        }px;"
         title="${cleanTitle}"
       ></button>
     </div>
@@ -224,7 +230,11 @@ function addDays(date, days) {
 }
 
 function toDateKey(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function daysBetween(start, end) {
