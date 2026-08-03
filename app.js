@@ -26,6 +26,8 @@ const resetCleanBtn = document.getElementById("resetCleanBtn");
 
 const menuToggleBtn = document.getElementById("menuToggleBtn");
 const adminMenu = document.getElementById("adminMenu");
+const exportDataBtn = document.getElementById("exportDataBtn");
+const importDataInput = document.getElementById("importDataInput");
 
 let state = {
   properties: [],
@@ -50,24 +52,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function bindButtons() {
   if (menuToggleBtn && adminMenu) {
-  menuToggleBtn.addEventListener("click", () => {
-    const isHidden = adminMenu.classList.toggle("hidden");
+    menuToggleBtn.addEventListener("click", () => {
+      const isHidden = adminMenu.classList.toggle("hidden");
 
-    menuToggleBtn.textContent = isHidden ? "Menu" : "Close Menu";
-    menuToggleBtn.setAttribute("aria-expanded", String(!isHidden));
-  });
+      menuToggleBtn.textContent = isHidden ? "Menu" : "Close Menu";
+      menuToggleBtn.setAttribute("aria-expanded", String(!isHidden));
+    });
+  }
+
+  if (exportDataBtn) {
+    exportDataBtn.addEventListener("click", exportData);
+  }
+
+  if (importDataInput) {
+    importDataInput.addEventListener("change", importData);
+  }
+
+  if (newPropertyBtn) {
+    newPropertyBtn.addEventListener("click", openNewProperty);
+  }
+
+  if (cancelPropertyBtn) {
+    cancelPropertyBtn.addEventListener("click", () => propertyDialog.close());
+  }
+
+  if (newStayBtn) {
+    newStayBtn.addEventListener("click", openNewStay);
+  }
+
+  if (cancelStayBtn) {
+    cancelStayBtn.addEventListener("click", () => stayDialog.close());
+  }
+
+  if (deleteStayBtn) {
+    deleteStayBtn.addEventListener("click", deleteCurrentStay);
+  }
+
+  if (cancelCleanBtn) {
+    cancelCleanBtn.addEventListener("click", () => cleanDialog.close());
+  }
+
+  if (resetCleanBtn) {
+    resetCleanBtn.addEventListener("click", resetClean);
+  }
 }
-  if (newPropertyBtn) newPropertyBtn.addEventListener("click", openNewProperty);
-  if (cancelPropertyBtn) cancelPropertyBtn.addEventListener("click", () => propertyDialog.close());
-
-  if (newStayBtn) newStayBtn.addEventListener("click", openNewStay);
-  if (cancelStayBtn) cancelStayBtn.addEventListener("click", () => stayDialog.close());
-  if (deleteStayBtn) deleteStayBtn.addEventListener("click", deleteCurrentStay);
-
-  if (cancelCleanBtn) cancelCleanBtn.addEventListener("click", () => cleanDialog.close());
-  if (resetCleanBtn) resetCleanBtn.addEventListener("click", resetClean);
-}
-
 // ======================================================
 // DATA STORAGE
 // ======================================================
@@ -97,6 +125,88 @@ function loadData() {
 
   state = { properties: [], stays: [], cleans: [] };
   saveData();
+}
+
+function exportData() {
+  const backup = {
+    app: "Cinderella",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: state
+  };
+
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const now = new Date();
+  const dateStamp = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0")
+  ].join("-");
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `cinderella-backup-${dateStamp}.json`;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    try {
+      const backup = JSON.parse(reader.result);
+
+      if (
+        backup.app !== "Cinderella" ||
+        !backup.data ||
+        !Array.isArray(backup.data.properties) ||
+        !Array.isArray(backup.data.stays) ||
+        !Array.isArray(backup.data.cleans)
+      ) {
+        throw new Error("This is not a valid Cinderella backup.");
+      }
+
+      const confirmed = confirm(
+        "This will replace all current Cinderella data with the backup. Continue?"
+      );
+
+      if (!confirmed) return;
+
+      state = {
+        properties: backup.data.properties,
+        stays: backup.data.stays,
+        cleans: backup.data.cleans
+      };
+
+      saveData();
+      render();
+
+      alert("Backup imported successfully.");
+    } catch (error) {
+      console.error("Could not import Cinderella backup.", error);
+      alert(error.message || "The backup could not be imported.");
+    } finally {
+      importDataInput.value = "";
+    }
+  };
+
+  reader.onerror = () => {
+    alert("The backup file could not be read.");
+    importDataInput.value = "";
+  };
+
+  reader.readAsText(file);
 }
 
 // ======================================================

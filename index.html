@@ -41,7 +41,6 @@
       <div class="section-heading">
         <div>
           <h2>Timeline</h2>
-          <p>Green dots need cleaning. Blue ticks are completed.</p>
         </div>
       </div>
 
@@ -53,7 +52,27 @@
         <h2>Cleaning Summary</h2>
         <div id="cleanSummaryCards" class="summary-grid"></div>
       </section>
+      <section class="section-card">
+        <h2>Backup & Restore</h2>
+        <p>Save a copy of all properties, stays and cleaning information.</p>
 
+        <div class="actions left-actions">
+          <button id="exportDataBtn" type="button">
+            Export Backup
+          </button>
+
+          <label class="button file-button" for="importDataInput">
+            Import Backup
+          </label>
+
+          <input
+            id="importDataInput"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+      </section>
       <section id="propertiesSection" class="section-card">
         <div class="section-heading">
           <h2>Properties</h2>
@@ -81,6 +100,20 @@
           <button id="demoStaysBtn" type="button">Generate Test Stays</button>
           <button id="clearDemoBtn" type="button">Clear Demo Data</button>
         </div>
+        
+        <div class="actions left-actions">
+          <button id="exportDataBtn" type="button">Export Backup</button>
+
+          <label class="button file-button">
+            Import Backup
+            <input
+              id="importDataInput"
+              type="file"
+              accept=".json,application/json"
+              hidden
+            />
+          </label>
+        </div>        
       </section>
     </div>
   </main>
