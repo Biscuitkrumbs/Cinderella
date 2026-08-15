@@ -1,14 +1,20 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cinderella Beta</title>
+
+  <title>Clean 1770 | Cleaning Planner</title>
+
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css?v=3" />
   <link rel="stylesheet" href="timeline.css?v=3" />
 </head>
+
 <body>
+
+  <!-- Success overlay -->
   <div id="successOverlay" class="success-overlay hidden">
     <div class="success-content">
       <div class="success-tick">✓</div>
@@ -16,14 +22,21 @@
     </div>
   </div>
 
+
+  <!-- Header -->
   <header class="app-header">
+
     <div class="app-title">
-      <h1>Cinderella</h1>
+      <h1>Clean 1770</h1>
       <p>Holiday rental cleaning planner</p>
     </div>
 
     <div class="header-actions">
-      <button id="newStayBtn" type="button">Add Stay</button>
+      <a class="button" href="index.html">Home</a>
+
+      <button id="newStayBtn" type="button">
+        Add Stay
+      </button>
 
       <button
         id="menuToggleBtn"
@@ -34,10 +47,18 @@
         Menu
       </button>
     </div>
+
   </header>
 
+
   <main>
-    <section id="timelineSection" class="section-card timeline-section">
+
+    <!-- Timeline -->
+    <section
+      id="timelineSection"
+      class="section-card timeline-section"
+    >
+
       <div class="section-heading">
         <div>
           <h2>Timeline</h2>
@@ -45,23 +66,52 @@
       </div>
 
       <div id="timelineCalendar"></div>
+
     </section>
 
+
+    <!-- Admin menu -->
     <div id="adminMenu" class="admin-menu hidden">
-      <section id="todaySection" class="section-card">
+
+
+      <!-- Cleaning summary -->
+      <section
+        id="todaySection"
+        class="section-card"
+      >
+
         <h2>Cleaning Summary</h2>
-        <div id="cleanSummaryCards" class="summary-grid"></div>
+
+        <div
+          id="cleanSummaryCards"
+          class="summary-grid"
+        ></div>
+
       </section>
+
+
+      <!-- Backup & Restore -->
       <section class="section-card">
-        <h2>Backup & Restore</h2>
-        <p>Save a copy of all properties, stays and cleaning information.</p>
+
+        <h2>Backup &amp; Restore</h2>
+
+        <p>
+          Save a copy of all properties, stays and cleaning information.
+        </p>
 
         <div class="actions left-actions">
-          <button id="exportDataBtn" type="button">
+
+          <button
+            id="exportDataBtn"
+            type="button"
+          >
             Export Backup
           </button>
 
-          <label class="button file-button" for="importDataInput">
+          <label
+            class="button file-button"
+            for="importDataInput"
+          >
             Import Backup
           </label>
 
@@ -71,211 +121,531 @@
             accept=".json,application/json"
             hidden
           />
+
         </div>
+
       </section>
-      <section id="propertiesSection" class="section-card">
+
+
+      <!-- Properties -->
+      <section
+        id="propertiesSection"
+        class="section-card"
+      >
+
         <div class="section-heading">
+
           <h2>Properties</h2>
-          <button id="newPropertyBtn" type="button">Add Property</button>
+
+          <button
+            id="newPropertyBtn"
+            type="button"
+          >
+            Add Property
+          </button>
+
         </div>
+
         <div id="propertiesList"></div>
+
       </section>
 
-      <section id="staysSection" class="section-card">
+
+      <!-- Stays -->
+      <section
+        id="staysSection"
+        class="section-card"
+      >
+
         <h2>Stays</h2>
+
         <div id="staysList"></div>
+
       </section>
 
-      <section id="cleansSection" class="section-card">
+
+      <!-- Cleans -->
+      <section
+        id="cleansSection"
+        class="section-card"
+      >
+
         <h2>Cleans</h2>
+
         <div id="cleansList"></div>
+
       </section>
 
-      <section id="developerTools" class="section-card developer-tools">
+
+      <!-- Developer tools -->
+      <section
+        id="developerTools"
+        class="section-card developer-tools"
+      >
+
         <h2>Developer Tools</h2>
+
         <p>For testing only.</p>
 
         <div class="actions left-actions">
-          <button id="demoPropertiesBtn" type="button">Generate Test Properties</button>
-          <button id="demoStaysBtn" type="button">Generate Test Stays</button>
-          <button id="clearDemoBtn" type="button">Clear Demo Data</button>
-        </div>
-        
-        <div class="actions left-actions">
-          <button id="exportDataBtn" type="button">Export Backup</button>
 
-          <label class="button file-button">
-            Import Backup
-            <input
-              id="importDataInput"
-              type="file"
-              accept=".json,application/json"
-              hidden
-            />
-          </label>
-        </div>        
+          <button
+            id="demoPropertiesBtn"
+            type="button"
+          >
+            Generate Test Properties
+          </button>
+
+          <button
+            id="demoStaysBtn"
+            type="button"
+          >
+            Generate Test Stays
+          </button>
+
+          <button
+            id="clearDemoBtn"
+            type="button"
+          >
+            Clear Demo Data
+          </button>
+
+        </div>
+
       </section>
+
     </div>
+
   </main>
 
+
+  <!-- Property dialog -->
   <dialog id="propertyDialog">
+
     <form id="propertyForm">
-      <h2 id="propertyFormTitle">Add Property</h2>
-      <input type="hidden" id="propertyId" />
 
-      <label>Property name
-        <input id="propertyName" required />
+      <h2 id="propertyFormTitle">
+        Add Property
+      </h2>
+
+      <input
+        type="hidden"
+        id="propertyId"
+      />
+
+
+      <label>
+        Property name
+
+        <input
+          id="propertyName"
+          required
+        />
       </label>
 
-      <label>Colour
-        <input id="propertyColour" type="color" value="#8b5cf6" />
+
+      <label>
+        Colour
+
+        <input
+          id="propertyColour"
+          type="color"
+          value="#8b5cf6"
+        />
       </label>
 
-      <label>Address
+
+      <label>
+        Address
+
         <input id="propertyAddress" />
       </label>
 
+
       <div class="two-column">
-        <label>Owner name
+
+        <label>
+          Owner name
+
           <input id="ownerName" />
         </label>
 
-        <label>Owner email
-          <input id="ownerEmail" type="email" />
+
+        <label>
+          Owner email
+
+          <input
+            id="ownerEmail"
+            type="email"
+          />
         </label>
+
       </div>
 
-      <label>Owner phone
+
+      <label>
+        Owner phone
+
         <input id="ownerPhone" />
       </label>
 
-      <label>Access notes
+
+      <label>
+        Access notes
+
         <textarea id="accessNotes"></textarea>
       </label>
 
-      <label>Key notes
+
+      <label>
+        Key notes
+
         <textarea id="keyNotes"></textarea>
       </label>
 
+
       <h3>Beds</h3>
+
+
       <div class="bed-grid">
-        <label>King beds
-          <input id="kingBeds" type="number" min="0" value="0" />
+
+        <label>
+          King beds
+
+          <input
+            id="kingBeds"
+            type="number"
+            min="0"
+            value="0"
+          />
         </label>
 
-        <label>Queen beds
-          <input id="queenBeds" type="number" min="0" value="0" />
+
+        <label>
+          Queen beds
+
+          <input
+            id="queenBeds"
+            type="number"
+            min="0"
+            value="0"
+          />
         </label>
 
-        <label>Single beds
-          <input id="singleBeds" type="number" min="0" value="0" />
+
+        <label>
+          Single beds
+
+          <input
+            id="singleBeds"
+            type="number"
+            min="0"
+            value="0"
+          />
         </label>
+
       </div>
 
-      <label>Cleaning notes
+
+      <label>
+        Cleaning notes
+
         <textarea id="cleaningNotes"></textarea>
       </label>
 
+
       <div class="actions">
-        <button type="button" id="cancelPropertyBtn">Cancel</button>
-        <button type="submit">Save Property</button>
+
+        <button
+          type="button"
+          id="cancelPropertyBtn"
+        >
+          Cancel
+        </button>
+
+        <button type="submit">
+          Save Property
+        </button>
+
       </div>
+
     </form>
+
   </dialog>
 
+
+  <!-- Stay dialog -->
   <dialog id="stayDialog">
+
     <form id="stayForm">
-      <div id="stayDialogColourBar" class="dialog-colour-bar"></div>
-      <h2 id="stayFormTitle">Add Stay</h2>
-      <input type="hidden" id="stayId" />
 
-      <label>Property
-        <select id="stayPropertyId" required></select>
+      <div
+        id="stayDialogColourBar"
+        class="dialog-colour-bar"
+      ></div>
+
+      <h2 id="stayFormTitle">
+        Add Stay
+      </h2>
+
+      <input
+        type="hidden"
+        id="stayId"
+      />
+
+
+      <label>
+        Property
+
+        <select
+          id="stayPropertyId"
+          required
+        ></select>
       </label>
 
-      <label>Guest name
-        <input id="guestName" required />
+
+      <label>
+        Guest name
+
+        <input
+          id="guestName"
+          required
+        />
       </label>
+
 
       <div class="two-column">
-        <label>Arrival date
-          <input id="arrivalDate" type="date" required />
+
+        <label>
+          Arrival date
+
+          <input
+            id="arrivalDate"
+            type="date"
+            required
+          />
         </label>
 
-        <label>Departure date
-          <input id="departureDate" type="date" required />
+
+        <label>
+          Departure date
+
+          <input
+            id="departureDate"
+            type="date"
+            required
+          />
         </label>
+
       </div>
 
-      <label>Stay notes
+
+      <label>
+        Stay notes
+
         <textarea id="stayNotes"></textarea>
       </label>
 
+
       <div class="actions">
-        <button type="button" id="deleteStayBtn" class="danger secondary-hidden">Delete Stay</button>
+
+        <button
+          type="button"
+          id="deleteStayBtn"
+          class="danger secondary-hidden"
+        >
+          Delete Stay
+        </button>
+
         <span class="actions-spacer"></span>
-        <button type="button" id="cancelStayBtn">Cancel</button>
-        <button type="submit">Save Stay</button>
+
+        <button
+          type="button"
+          id="cancelStayBtn"
+        >
+          Cancel
+        </button>
+
+        <button type="submit">
+          Save Stay
+        </button>
+
       </div>
+
     </form>
+
   </dialog>
 
-  <dialog id="cleanDialog">
-    <form id="cleanForm">
-      <div id="cleanDialogColourBar" class="dialog-colour-bar"></div>
-      <h2>Complete Clean</h2>
-      <input type="hidden" id="cleanId" />
 
-      <p id="cleanSummary" class="dialog-summary"></p>
+  <!-- Clean dialog -->
+  <dialog id="cleanDialog">
+
+    <form id="cleanForm">
+
+      <div
+        id="cleanDialogColourBar"
+        class="dialog-colour-bar"
+      ></div>
+
+      <h2>Complete Clean</h2>
+
+      <input
+        type="hidden"
+        id="cleanId"
+      />
+
+      <p
+        id="cleanSummary"
+        class="dialog-summary"
+      ></p>
+
 
       <h3>Linen</h3>
+
+
       <table class="linen-table">
+
         <thead>
+
           <tr>
             <th></th>
             <th>Changed</th>
             <th>Replaced</th>
           </tr>
+
         </thead>
+
+
         <tbody>
+
           <tr>
             <td>King Set</td>
-            <td><input id="cleanKingBeds" type="number" min="0" value="0" /></td>
-            <td><input id="replaceKingBeds" type="number" min="0" value="0" /></td>
+
+            <td>
+              <input
+                id="cleanKingBeds"
+                type="number"
+                min="0"
+                value="0"
+              />
+            </td>
+
+            <td>
+              <input
+                id="replaceKingBeds"
+                type="number"
+                min="0"
+                value="0"
+              />
+            </td>
           </tr>
+
+
           <tr>
             <td>Queen Set</td>
-            <td><input id="cleanQueenBeds" type="number" min="0" value="0" /></td>
-            <td><input id="replaceQueenBeds" type="number" min="0" value="0" /></td>
+
+            <td>
+              <input
+                id="cleanQueenBeds"
+                type="number"
+                min="0"
+                value="0"
+              />
+            </td>
+
+            <td>
+              <input
+                id="replaceQueenBeds"
+                type="number"
+                min="0"
+                value="0"
+              />
+            </td>
           </tr>
+
+
           <tr>
             <td>Single Set</td>
-            <td><input id="cleanSingleBeds" type="number" min="0" value="0" /></td>
-            <td><input id="replaceSingleBeds" type="number" min="0" value="0" /></td>
+
+            <td>
+              <input
+                id="cleanSingleBeds"
+                type="number"
+                min="0"
+                value="0"
+              />
+            </td>
+
+            <td>
+              <input
+                id="replaceSingleBeds"
+                type="number"
+                min="0"
+                value="0"
+              />
+            </td>
           </tr>
+
         </tbody>
+
       </table>
 
-      <label>Extras
-        <textarea id="cleanExtras" placeholder="Extra charges, damage, special notes..."></textarea>
+
+      <label>
+        Extras
+
+        <textarea
+          id="cleanExtras"
+          placeholder="Extra charges, damage, special notes..."
+        ></textarea>
       </label>
 
-      <label>Invoice notes
-        <textarea id="invoiceNotes" placeholder="Anything that should appear on the invoice later..."></textarea>
+
+      <label>
+        Invoice notes
+
+        <textarea
+          id="invoiceNotes"
+          placeholder="Anything that should appear on the invoice later..."
+        ></textarea>
       </label>
+
 
       <div class="actions">
-        <button type="button" id="resetCleanBtn">Mark as Pending</button>
+
+        <button
+          type="button"
+          id="resetCleanBtn"
+        >
+          Mark as Pending
+        </button>
+
         <span class="actions-spacer"></span>
-        <button type="button" id="cancelCleanBtn">Cancel</button>
-        <button type="submit">Save &amp; Complete</button>
+
+        <button
+          type="button"
+          id="cancelCleanBtn"
+        >
+          Cancel
+        </button>
+
+        <button type="submit">
+          Save &amp; Complete
+        </button>
+
       </div>
+
     </form>
+
   </dialog>
 
+
+  <!-- Scripts -->
   <script src="config.js"></script>
   <script src="app.js?v=3"></script>
   <script src="timeline.js?v=3"></script>
   <script src="developer.js"></script>
+
 </body>
+
 </html>
