@@ -9,15 +9,15 @@
   --max-width: 1180px;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 html {
@@ -39,10 +39,29 @@ body {
     sans-serif;
 }
 
+img {
+  max-width: 100%;
+}
+
 a {
   color: inherit;
 }
 
+.site-header,
+.landing,
+.site-footer {
+  width: min(calc(100% - 64px), var(--max-width));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.site-header {
+  min-height: 88px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
 /* -------------------------
    HEADER
